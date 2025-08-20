@@ -1,0 +1,1802 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "8053ff33aac82fb9",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": 8086,
+        "protocol": "http",
+        "database": "database",
+        "name": "InfluxServer",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://host.docker.internal:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "3cc11d24.ff01a2",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "WARNING: please check you have started this container with a volume that is mounted to /data\\n otherwise any flow changes are lost when you redeploy or upgrade the container\\n (e.g. upgrade to a more recent node-red docker image).\\n  If you are using named volumes you can ignore this warning.\\n Double click or see info side panel to learn how to start Node-RED in Docker to save your work",
+        "info": "\nTo start docker with a bind mount volume (-v option), for example:\n\n```\ndocker run -it -p 1880:1880 -v /home/user/node_red_data:/data --name mynodered nodered/node-red\n```\n\nwhere `/home/user/node_red_data` is a directory on your host machine where you want to store your flows.\n\nIf you do not do this then you can experiment and redploy flows, but if you restart or upgrade the container the flows will be disconnected and lost. \n\nThey will still exist in a hidden data volume, which can be recovered using standard docker techniques, but that is much more complex than just starting with a named volume as described above.",
+        "x": 350,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "37bf6063cd74f6bb",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "d": true,
+        "name": "create timestamp - Weather",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 300,
+        "wires": [
+            [
+                "288efaae84788543"
+            ]
+        ]
+    },
+    {
+        "id": "3e1c58c7ecc5fee9",
+        "type": "http request",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 110,
+        "y": 580,
+        "wires": [
+            [
+                "7ea297f91d7491ec",
+                "6a04572397a0f817",
+                "1ad9bf5e1d7d407d"
+            ]
+        ]
+    },
+    {
+        "id": "7ea297f91d7491ec",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "extract temperature",
+        "func": "// inside your Function node\nconst now       = new Date();\nconst oneHour   = 60 * 60 * 1000;\nconst start     = new Date(now.getTime() - oneHour).toISOString();\nconst stop      = now.toISOString();\nconst pointTime = now.toISOString();  // this will be your _time\n\nmsg.payload = [\n  {\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    msg.payload.main.temp,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"temperature\",\n  }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 130,
+        "y": 620,
+        "wires": [
+            [
+                "bb07b6d80434b1b1"
+            ]
+        ]
+    },
+    {
+        "id": "b65502e39e18edd1",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Lahore- Influx",
+        "measurement": "Temperature",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "lahoreWeather",
+        "x": 120,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "ebad572527a63bc8",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "d": true,
+        "name": "create timestamp - Air quality",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1790,
+        "y": 760,
+        "wires": [
+            [
+                "7738f0004d9fb9cb"
+            ]
+        ]
+    },
+    {
+        "id": "7738f0004d9fb9cb",
+        "type": "http request",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=52.52&longitude=13.41&hourly=pm10,pm2_5&current=european_aqi&domains=cams_europe",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1830,
+        "y": 820,
+        "wires": [
+            [
+                "65199b59328b6ec5"
+            ]
+        ]
+    },
+    {
+        "id": "65199b59328b6ec5",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "extract air quality",
+        "func": "// inside your Function node\nconst now       = new Date();\nconst oneHour   = 60 * 60 * 1000;\nconst start     = new Date(now.getTime() - oneHour).toISOString();\nconst stop      = now.toISOString();\nconst pointTime = now.toISOString();  // this will be your _time\n\nmsg.payload = [\n  {\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    msg.payload.current.european_aqi,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"AQI\",\n\n    // your tag column\n    region: \"Europe\",  // e.g. \"London\"\n    unit: \"μg/m³\"\n  }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1830,
+        "y": 880,
+        "wires": [
+            [
+                "6703970d25286f18"
+            ]
+        ]
+    },
+    {
+        "id": "6703970d25286f18",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Store in Influx",
+        "measurement": "airQuality",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "airQuality",
+        "x": 1820,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "c3960a765f2a6849",
+        "type": "catch",
+        "z": "f6f2187d.f17ca8",
+        "name": "AQI http request failure",
+        "scope": [
+            "7738f0004d9fb9cb"
+        ],
+        "uncaught": false,
+        "x": 1520,
+        "y": 760,
+        "wires": [
+            [
+                "93560c72ee77c826"
+            ]
+        ]
+    },
+    {
+        "id": "93560c72ee77c826",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "HTTP Failed",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1510,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "72d6d715ba340832",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Swap City",
+        "func": "// Define your city list\nconst cities = [\"Lahore\", \"Islamabad\", \"Karachi\"];\n\n// Get the current city from flow context\nlet current = flow.get(\"curCity\");\n\n// Determine the next index\nlet nextIndex;\nif (typeof current === \"undefined\" || cities.indexOf(current) === -1) {\n    // First run (or invalid stored value): start at 0\n    nextIndex = 0;\n} else {\n    // Otherwise move to the next, wrapping around\n    const currentIndex = cities.indexOf(current);\n    nextIndex = (currentIndex + 1) % cities.length;\n}\n\n// Set and output the new current city\nconst nextCity = cities[nextIndex];\nflow.set(\"curCity\", nextCity);\n// (Optional) attach to msg for downstream nodes\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 100,
+        "y": 460,
+        "wires": [
+            [
+                "f17a08cc2649aca9"
+            ]
+        ]
+    },
+    {
+        "id": "90eeb15b1f1a8fe0",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "Universal",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 180,
+        "wires": [
+            [
+                "72d6d715ba340832"
+            ]
+        ]
+    },
+    {
+        "id": "43689d1d8304732c",
+        "type": "complete",
+        "z": "f6f2187d.f17ca8",
+        "name": "Run Placeholder",
+        "scope": [
+            "49a02598ba171560"
+        ],
+        "uncaught": false,
+        "x": 440,
+        "y": 300,
+        "wires": [
+            [
+                "810a0d407a996f6e"
+            ]
+        ]
+    },
+    {
+        "id": "810a0d407a996f6e",
+        "type": "delay",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "15",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 420,
+        "y": 360,
+        "wires": [
+            [
+                "0896301fbd4c89c1"
+            ]
+        ]
+    },
+    {
+        "id": "0896301fbd4c89c1",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Halt if all Cities Iterated Through",
+        "property": "curCity",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "Karachi",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Karachi",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 390,
+        "y": 440,
+        "wires": [
+            [
+                "49a02598ba171560"
+            ],
+            [
+                "72d6d715ba340832",
+                "57ac7bbf322e0984"
+            ]
+        ]
+    },
+    {
+        "id": "ad0d14279c40ed01",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Display Message 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 690,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "bd765f85fd8f353d",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Message",
+        "func": "msg.payload = \"Flow Stopped\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 540,
+        "wires": [
+            [
+                "ad0d14279c40ed01"
+            ]
+        ]
+    },
+    {
+        "id": "f17a08cc2649aca9",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Get API",
+        "func": "// 2nd Function node: build the weather API call\n\n// 1. Read the current city from flow context:\nconst city = flow.get(\"curCity\") || \"\";\n\n// 2. Your OpenWeatherMap API key and base URL:\nconst apiKey = \"cc8da9171cad45150a1f309e320d5276\";\nconst baseUrl = \"http://api.openweathermap.org/data/2.5/weather\";\n\n// 3. Construct the full URL (with proper URL-encoding of the city name):\nconst url = `${baseUrl}?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;\n\n// 4. Prepare the msg for the HTTP Request node:\nmsg.method = \"GET\";\nmsg.url = url;\n\n// 5. Forward the message\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 100,
+        "y": 520,
+        "wires": [
+            [
+                "3e1c58c7ecc5fee9",
+                "748286f58605bd63"
+            ]
+        ]
+    },
+    {
+        "id": "748286f58605bd63",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Message",
+        "func": "msg.payload = `Running the following:\\nCity: ${flow.get(\"curCity\")}\\nURL: ${msg.url}`;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 540,
+        "wires": [
+            [
+                "66e138b8025fac0d"
+            ]
+        ]
+    },
+    {
+        "id": "66e138b8025fac0d",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Display Message - Weather1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 440,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "49a02598ba171560",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Placeholder - Weather",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 140,
+        "y": 420,
+        "wires": [
+            [
+                "72d6d715ba340832"
+            ]
+        ]
+    },
+    {
+        "id": "57ac7bbf322e0984",
+        "type": "delay",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "200",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 660,
+        "y": 440,
+        "wires": [
+            [
+                "bd765f85fd8f353d"
+            ]
+        ]
+    },
+    {
+        "id": "288efaae84788543",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "curCity",
+                "pt": "flow",
+                "to": "Lahore",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 120,
+        "y": 360,
+        "wires": [
+            [
+                "49a02598ba171560"
+            ]
+        ]
+    },
+    {
+        "id": "9fe6c05a5ef04a85",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 640,
+        "y": 720,
+        "wires": [
+            [
+                "5799d124411a116c"
+            ]
+        ]
+    },
+    {
+        "id": "5799d124411a116c",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "curCity",
+                "pt": "flow",
+                "to": "Berlin",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "temp",
+                "pt": "msg",
+                "to": "25",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 640,
+        "y": 760,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bb07b6d80434b1b1",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Check Current City",
+        "property": "curCity",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Lahore",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Islamabad",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Karachi",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 130,
+        "y": 680,
+        "wires": [
+            [
+                "b65502e39e18edd1",
+                "7740bc9a405cfeda"
+            ],
+            [
+                "cb2ecec7bc20dc61",
+                "7740bc9a405cfeda"
+            ],
+            [
+                "39c0e0e503444f2d",
+                "7740bc9a405cfeda"
+            ]
+        ]
+    },
+    {
+        "id": "cb2ecec7bc20dc61",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Islamabad- Influx",
+        "measurement": "Temperature",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "islamabadWeather",
+        "x": 130,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "39c0e0e503444f2d",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Karachi- Influx",
+        "measurement": "Temperature",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "karachiWeather",
+        "x": 120,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "7740bc9a405cfeda",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Message",
+        "func": "return msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 760,
+        "wires": [
+            [
+                "9ffddff2d135d92f"
+            ]
+        ]
+    },
+    {
+        "id": "9ffddff2d135d92f",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Display Message 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 410,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "6a04572397a0f817",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debug - msg.payload.temp (Weather)",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.main.temp",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 470,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "1ad9bf5e1d7d407d",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debud - msg.payload (Weather)",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 450,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "7d04c47483cd8cbd",
+        "type": "http in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Get Info",
+        "url": "/submit",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 1670,
+        "y": 140,
+        "wires": [
+            [
+                "9f9bc234e299eac7"
+            ]
+        ]
+    },
+    {
+        "id": "9f9bc234e299eac7",
+        "type": "json",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 1670,
+        "y": 180,
+        "wires": [
+            [
+                "9dbeb9c5f60467d5"
+            ]
+        ]
+    },
+    {
+        "id": "9dbeb9c5f60467d5",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Get information",
+        "func": "/*\nExpecting incoming msg.payload (JS object), e.g.\n{\n  \"region\": \"Lahore\",\n  \"airQuality\": \"2\",\n  \"weather\": \"1\",\n  \"timestamp\": \"2025-08-18T07:12:00Z\" // optional - ISO string\n}\n*/\n\n\n// normalize region -> bucket name\nconst region = msg.payload.region;\n\n// get numeric values (allow direct numeric fallback)\nconst airQuality = Number(msg.payload.airQuality);\n\nconst weather = Number(msg.payload.weather);\n\n\n\nconst now       = new Date();\nconst oneHour   = 60 * 60 * 1000;\nconst start     = new Date(now.getTime() - oneHour).toISOString();\nconst stop      = now.toISOString();\nconst pointTime = now.toISOString();  // this will be your _time\n\nmsg.airQualityPayload = [\n  {\n\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    airQuality,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"AirQuality\",\n  }\n];\n\nmsg.weatherPayload = [\n  {\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    weather,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"weather\",\n  }\n];\n\nmsg.curCity = region;\nmsg.payload = region;\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1700,
+        "y": 240,
+        "wires": [
+            [
+                "4c1a0ec1a09c4abc",
+                "3d6f7608079e550c"
+            ]
+        ]
+    },
+    {
+        "id": "4c1a0ec1a09c4abc",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "weatherPayload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "weatherPayload",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "measurement",
+                "pt": "msg",
+                "to": "Weather",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1620,
+        "y": 300,
+        "wires": [
+            [
+                "048c9a6fbad39ae0",
+                "d81eb67a02d11379"
+            ]
+        ]
+    },
+    {
+        "id": "b689bd55e95aa079",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "airQualityPayload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "airQualityPayload",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "measurement",
+                "pt": "msg",
+                "to": "AirQuality",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1550,
+        "y": 520,
+        "wires": [
+            [
+                "048c9a6fbad39ae0",
+                "e25776cb87091db5"
+            ]
+        ]
+    },
+    {
+        "id": "048c9a6fbad39ae0",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Check Current City",
+        "property": "curCity",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Lahore",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Islamabad",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Karachi",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 1630,
+        "y": 360,
+        "wires": [
+            [
+                "5765de39e93813e8"
+            ],
+            [
+                "ec18dbe0a3dc6668"
+            ],
+            [
+                "92a589b7aef2bf37"
+            ]
+        ]
+    },
+    {
+        "id": "ec18dbe0a3dc6668",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Islamabad- Influx",
+        "measurement": "",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "islamabadFeelsLike",
+        "x": 1910,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "92a589b7aef2bf37",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Karachi- Influx",
+        "measurement": "",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "karachiFeelsLike",
+        "x": 1900,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "5765de39e93813e8",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Lahore- Influx",
+        "measurement": "",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "lahoreFeelsLike",
+        "x": 1900,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "3d6f7608079e550c",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2000,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "d81eb67a02d11379",
+        "type": "delay",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1540,
+        "y": 480,
+        "wires": [
+            [
+                "b689bd55e95aa079"
+            ]
+        ]
+    },
+    {
+        "id": "e25776cb87091db5",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1980,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "6e66f4f1265ef5b8",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "d": true,
+        "name": "create timestamp - Air Quality",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "1800",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 296.1999969482422,
+        "y": 1027.800048828125,
+        "wires": [
+            [
+                "96dcdc87e7714087"
+            ]
+        ]
+    },
+    {
+        "id": "8c41eba40b2fcac2",
+        "type": "http request",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 190,
+        "y": 1300,
+        "wires": [
+            [
+                "315ebd1d3641ef3a",
+                "e9ed19672835ccf6",
+                "0e6768a39368d6d6"
+            ]
+        ]
+    },
+    {
+        "id": "0e6768a39368d6d6",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "extract AQI",
+        "func": "// inside your Function node\nconst now       = new Date();\nconst oneHour   = 60 * 60 * 1000;\nconst start     = new Date(now.getTime() - oneHour).toISOString();\nconst stop      = now.toISOString();\nconst pointTime = now.toISOString();  // this will be your _time\n\nmsg.payload = [\n  {\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    msg.payload.data.aqi,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"AQI\",\n  }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 190,
+        "y": 1340,
+        "wires": [
+            [
+                "72c3c6ab69d6a669"
+            ]
+        ]
+    },
+    {
+        "id": "1d55455e468a4cf2",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Lahore- Influx",
+        "measurement": "AQI",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "lahoreAQI",
+        "x": 490,
+        "y": 1600,
+        "wires": []
+    },
+    {
+        "id": "9e00219dedc36c69",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Swap City",
+        "func": "// Define your city list\nconst cities = [\"Lahore\", \"Islamabad\", \"Karachi\"];\n\n// Get the current city from flow context\nlet current = flow.get(\"curCity\");\n\n// Determine the next index\nlet nextIndex;\nif (typeof current === \"undefined\" || cities.indexOf(current) === -1) {\n    // First run (or invalid stored value): start at 0\n    nextIndex = 0;\n} else {\n    // Otherwise move to the next, wrapping around\n    const currentIndex = cities.indexOf(current);\n    nextIndex = (currentIndex + 1) % cities.length;\n}\n\n// Set and output the new current city\nconst nextCity = cities[nextIndex];\nflow.set(\"curCity\", nextCity);\n// (Optional) attach to msg for downstream nodes\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 166.1999969482422,
+        "y": 1187.800048828125,
+        "wires": [
+            [
+                "4516c611abc5eb6f"
+            ]
+        ]
+    },
+    {
+        "id": "7ca89edc26e5bc63",
+        "type": "complete",
+        "z": "f6f2187d.f17ca8",
+        "name": "Run Placeholder",
+        "scope": [
+            "7a634ae94055193f"
+        ],
+        "uncaught": false,
+        "x": 526.1999969482422,
+        "y": 1027.800048828125,
+        "wires": [
+            [
+                "e10f499da59e93d8"
+            ]
+        ]
+    },
+    {
+        "id": "e10f499da59e93d8",
+        "type": "delay",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "15",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 516.1999969482422,
+        "y": 1087.800048828125,
+        "wires": [
+            [
+                "af0eebb9416fd674"
+            ]
+        ]
+    },
+    {
+        "id": "af0eebb9416fd674",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Halt if all Cities Iterated Through",
+        "property": "curCity",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "Karachi",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Karachi",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 526.1999969482422,
+        "y": 1167.800048828125,
+        "wires": [
+            [
+                "7a634ae94055193f"
+            ],
+            [
+                "9e00219dedc36c69",
+                "20ce8549ea189227"
+            ]
+        ]
+    },
+    {
+        "id": "136d412b2dde4edb",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Display Message 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 746.1999969482422,
+        "y": 1307.800048828125,
+        "wires": []
+    },
+    {
+        "id": "d5c3846ee7d6a2f9",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Message",
+        "func": "msg.payload = \"Flow Stopped\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 686.1999969482422,
+        "y": 1267.800048828125,
+        "wires": [
+            [
+                "136d412b2dde4edb"
+            ]
+        ]
+    },
+    {
+        "id": "4516c611abc5eb6f",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Get API",
+        "func": "// 2nd Function node: build the weather API call\n\n// 1. Read the current city from flow context:\nconst city = flow.get(\"curCity\") || \"\";\nconst cities = [\"Lahore\", \"Islamabad\", \"Karachi\"];\n\n\n// 2. Your OpenWeatherMap API key and base URL:\nconst apiKey = \"5110c2fdcb4edf95929f5553d99a9125317139c7\";\nconst baseUrl = \"https://api.waqi.info\";\n//e.g. https://api.waqi.info/feed/A471607/?token=5110c2fdcb4edf95929f5553d99a9125317139c7\n// 3. Construct the full URL (with proper URL-encoding of the city name):\nconst url = `${baseUrl}/feed/${city}/?token=${apiKey}`;\n\n// 4. Prepare the msg for the HTTP Request node:\nmsg.url = url;\n\n\n// 5. Forward the message\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 166.1999969482422,
+        "y": 1247.800048828125,
+        "wires": [
+            [
+                "c79ac6622bb5104f",
+                "8c41eba40b2fcac2"
+            ]
+        ]
+    },
+    {
+        "id": "c79ac6622bb5104f",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Message",
+        "func": "msg.payload = `Running the following:\\nCity: ${flow.get(\"curCity\")}\\nURL: ${msg.url}`;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 426.1999969482422,
+        "y": 1267.800048828125,
+        "wires": [
+            [
+                "398053780df23f73"
+            ]
+        ]
+    },
+    {
+        "id": "398053780df23f73",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Display Message - AQI1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 526.1999969482422,
+        "y": 1307.800048828125,
+        "wires": []
+    },
+    {
+        "id": "7a634ae94055193f",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Placeholder - AQI",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 206.1999969482422,
+        "y": 1147.800048828125,
+        "wires": [
+            [
+                "9e00219dedc36c69"
+            ]
+        ]
+    },
+    {
+        "id": "20ce8549ea189227",
+        "type": "delay",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "200",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 700,
+        "y": 1220,
+        "wires": [
+            [
+                "d5c3846ee7d6a2f9"
+            ]
+        ]
+    },
+    {
+        "id": "96dcdc87e7714087",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "curCity",
+                "pt": "flow",
+                "to": "Lahore",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 216.1999969482422,
+        "y": 1087.800048828125,
+        "wires": [
+            [
+                "7a634ae94055193f"
+            ]
+        ]
+    },
+    {
+        "id": "4660ef18db6f5575",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 706.1999969482422,
+        "y": 1447.800048828125,
+        "wires": [
+            [
+                "d55a059cbea9a68b"
+            ]
+        ]
+    },
+    {
+        "id": "d55a059cbea9a68b",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "curCity",
+                "pt": "flow",
+                "to": "Berlin",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "temp",
+                "pt": "msg",
+                "to": "25",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 736.1999969482422,
+        "y": 1487.800048828125,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "437a4a84c73a9d44",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Check Current City",
+        "property": "curCity",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Lahore",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Islamabad",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Karachi",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 490,
+        "y": 1540,
+        "wires": [
+            [
+                "1d55455e468a4cf2",
+                "c443c1c4cef5f37b"
+            ],
+            [
+                "fb64dafa01fdd7f9",
+                "c443c1c4cef5f37b"
+            ],
+            [
+                "a482b622b3e226e4",
+                "c443c1c4cef5f37b"
+            ]
+        ]
+    },
+    {
+        "id": "fb64dafa01fdd7f9",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Islamabad- Influx",
+        "measurement": "AQI",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "islamabadAQI",
+        "x": 510,
+        "y": 1640,
+        "wires": []
+    },
+    {
+        "id": "a482b622b3e226e4",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Karachi- Influx",
+        "measurement": "AQI",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "karachiAQI",
+        "x": 490,
+        "y": 1680,
+        "wires": []
+    },
+    {
+        "id": "c443c1c4cef5f37b",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Message",
+        "func": "return msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 1560,
+        "wires": [
+            [
+                "94b5089c6e1149d5"
+            ]
+        ]
+    },
+    {
+        "id": "94b5089c6e1149d5",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "END",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 690,
+        "y": 1620,
+        "wires": []
+    },
+    {
+        "id": "315ebd1d3641ef3a",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debug - msg.payload.data.aqi - AQI",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.data.aqi",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 586.1999969482422,
+        "y": 1367.800048828125,
+        "wires": []
+    },
+    {
+        "id": "e9ed19672835ccf6",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debud - msg.payload -AQI",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 546.1999969482422,
+        "y": 1407.800048828125,
+        "wires": []
+    },
+    {
+        "id": "72c3c6ab69d6a669",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Reject Empty AQI Value",
+        "property": "payload[0]._value",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "-",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "-",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 210,
+        "y": 1400,
+        "wires": [
+            [
+                "437a4a84c73a9d44"
+            ],
+            [
+                "7f3796cbbf8633d8"
+            ]
+        ]
+    },
+    {
+        "id": "7f3796cbbf8633d8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Rejection Message",
+        "func": "msg.payload = \"AQI Value was empty. Aborting process\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 150,
+        "y": 1560,
+        "wires": [
+            [
+                "5f8c909f22ace2e7"
+            ]
+        ]
+    },
+    {
+        "id": "5f8c909f22ace2e7",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "END",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 100,
+        "y": 1620,
+        "wires": []
+    },
+    {
+        "id": "37f928be94b599f3",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "d": true,
+        "name": "False Data Generator",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "30",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1380,
+        "y": 140,
+        "wires": [
+            [
+                "372eda4353591820"
+            ]
+        ]
+    },
+    {
+        "id": "372eda4353591820",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Create Randomized Data",
+        "func": "/*\nExpecting incoming msg.payload (JS object), e.g.\n{\n  \"region\": \"Lahore\",\n  \"airQuality\": \"2\",\n  \"weather\": \"1\",\n  \"timestamp\": \"2025-08-18T07:12:00Z\" // optional - ISO string\n}\n*/\nconst cities = [\"Lahore\", \"Islamabad\", \"Karachi\"];\nconst randomCityIndex = Math.floor(Math.random() * 3);\n// normalize region -> bucket name\nconst region = cities[randomCityIndex];\nlet maxSatisfactionA;\nlet maxSatisfactionW;\nif (region == \"Lahore\")\n{\n  maxSatisfactionA = flow.get(\"lahoreMaxLocalSatisfactionA\");\n  maxSatisfactionW = flow.get(\"lahoreMaxLocalSatisfactionW\");\n\n}\nelse if (region == \"Islamabad\")\n{\n  maxSatisfactionA = flow.get(\"islamabadMaxLocalSatisfactionA\");\n  maxSatisfactionW = flow.get(\"islamabadMaxLocalSatisfactionW\");\n\n}\nelse \n{\n  maxSatisfactionA = flow.get(\"karachiMaxLocalSatisfactionA\");\n  maxSatisfactionW = flow.get(\"karachiMaxLocalSatisfactionW\");\n\n}\n\n// get numeric values (allow direct numeric fallback)\nconst airQuality = Math.floor(Math.random() * maxSatisfactionA) + 1;\n\nconst weather = Math.floor(Math.random() * maxSatisfactionW) + 1;\n\n\n\nconst now       = new Date();\nconst oneHour   = 60 * 60 * 1000;\nconst start     = new Date(now.getTime() - oneHour).toISOString();\nconst stop      = now.toISOString();\nconst pointTime = now.toISOString();  // this will be your _time\n\nmsg.airQualityPayload = [\n  {\n\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    airQuality,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"AirQuality\",\n  }\n];\n\nmsg.weatherPayload = [\n  {\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    weather,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"weather\",\n  }\n];\n\nmsg.curCity = region;\nmsg.payload = region;\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1390,
+        "y": 200,
+        "wires": [
+            [
+                "4c1a0ec1a09c4abc",
+                "3d6f7608079e550c"
+            ]
+        ]
+    },
+    {
+        "id": "24da58f187d5609d",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "d": true,
+        "name": "Random general View Generator",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "1800",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1180,
+        "y": 40,
+        "wires": [
+            [
+                "46e72e66dfbe717f"
+            ]
+        ]
+    },
+    {
+        "id": "46e72e66dfbe717f",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "function 1",
+        "func": "flow.set(\"lahoreMaxLocalSatisfactionW\", Math.floor(Math.random() * 10) + 1);\nflow.set(\"islamabadMaxLocalSatisfactionW\", Math.floor(Math.random() * 10) + 1);\nflow.set(\"karachiMaxLocalSatisfactionW\", Math.floor(Math.random() * 10) + 1);\n\nflow.set(\"lahoreMaxLocalSatisfactionA\", Math.floor(Math.random() * 10) + 1);\nflow.set(\"islamabadMaxLocalSatisfactionA\", Math.floor(Math.random() * 10) + 1);\nflow.set(\"karachiMaxLocalSatisfactionA\", Math.floor(Math.random() * 10) + 1);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1100,
+        "y": 120,
+        "wires": [
+            [
+                "5e65ec7e30cf55d7"
+            ]
+        ]
+    },
+    {
+        "id": "5e65ec7e30cf55d7",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Views Reset",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1150,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "948bbb2198c950a0",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-influxdb": "0.7.0"
+        }
+    }
+]
