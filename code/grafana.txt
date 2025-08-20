@@ -1,0 +1,43 @@
+Grafana Code
+
+AQI
+from(bucket: "islamabadAQI")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "AQI")
+  |> filter(fn: (r) => r["_field"] == "_value")
+  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+  |> yield(name: "mean")
+
+
+Weather
+from(bucket: "islamabadWeather")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "Temperature")
+  |> filter(fn: (r) => r["_field"] == "_value")
+  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+  |> yield(name: "mean")
+
+Local views
+from(bucket: "islamabadFeelsLike")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) =>
+       (r._measurement == "AirQuality" and (r._field == "_value")) or
+       (r._measurement == "Weather" and (r._field == "_value"))
+     )
+period = 30m     // how wide each window is (more width = smoother)
+every  = 1m     // how often we emit a window (smaller = denser / smoother)
+
+Average local views
+
+from(bucket: "islamabadFeelsLike")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) =>
+       (r._measurement == "AirQuality" and r._field == "_value") or
+       (r._measurement == "Weather"    and r._field == "_value")
+     )
+  |> group(columns: ["_measurement"])        // compute separately per measurement
+  |> window(every: every, period: period, createEmpty: false) 
+  |> mean()                                 // mean over each sliding window
+  |> map(fn: (r) => ({ r with _time: r._stop })) // put the point at window end (or use _start)
+  |> group(columns: ["_measurement"])        // re-group for plotting if needed
+  |> yield(name: "sliding_time_window_mean")
