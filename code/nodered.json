@@ -2,12 +2,51 @@
     {
         "id": "f6f2187d.f17ca8",
         "type": "tab",
-        "label": "Flow 1",
+        "label": "API to Influx",
         "disabled": false,
         "info": ""
     },
     {
+        "id": "c8dca1c07927e80d",
+        "type": "tab",
+        "label": "Flutter to Influx",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "90b264d3d8642dfb",
+        "type": "tab",
+        "label": "Influx to Python",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "30f9ed914c390e37",
+        "type": "tab",
+        "label": "Python to Influx",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "8053ff33aac82fb9",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": 8086,
+        "protocol": "http",
+        "database": "database",
+        "name": "InfluxServer",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://host.docker.internal:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "b964f598819af5c0",
         "type": "influxdb",
         "hostname": "127.0.0.1",
         "port": 8086,
@@ -35,7 +74,6 @@
         "id": "37bf6063cd74f6bb",
         "type": "inject",
         "z": "f6f2187d.f17ca8",
-        "d": true,
         "name": "create timestamp - Weather",
         "props": [
             {
@@ -124,133 +162,6 @@
         "bucket": "lahoreWeather",
         "x": 120,
         "y": 740,
-        "wires": []
-    },
-    {
-        "id": "ebad572527a63bc8",
-        "type": "inject",
-        "z": "f6f2187d.f17ca8",
-        "d": true,
-        "name": "create timestamp - Air quality",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "v": "",
-                "vt": "date"
-            }
-        ],
-        "repeat": "300",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 1790,
-        "y": 760,
-        "wires": [
-            [
-                "7738f0004d9fb9cb"
-            ]
-        ]
-    },
-    {
-        "id": "7738f0004d9fb9cb",
-        "type": "http request",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "method": "GET",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=52.52&longitude=13.41&hourly=pm10,pm2_5&current=european_aqi&domains=cams_europe",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 1830,
-        "y": 820,
-        "wires": [
-            [
-                "65199b59328b6ec5"
-            ]
-        ]
-    },
-    {
-        "id": "65199b59328b6ec5",
-        "type": "function",
-        "z": "f6f2187d.f17ca8",
-        "name": "extract air quality",
-        "func": "// inside your Function node\nconst now       = new Date();\nconst oneHour   = 60 * 60 * 1000;\nconst start     = new Date(now.getTime() - oneHour).toISOString();\nconst stop      = now.toISOString();\nconst pointTime = now.toISOString();  // this will be your _time\n\nmsg.payload = [\n  {\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    msg.payload.current.european_aqi,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"AQI\",\n\n    // your tag column\n    region: \"Europe\",  // e.g. \"London\"\n    unit: \"μg/m³\"\n  }\n];\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1830,
-        "y": 880,
-        "wires": [
-            [
-                "6703970d25286f18"
-            ]
-        ]
-    },
-    {
-        "id": "6703970d25286f18",
-        "type": "influxdb out",
-        "z": "f6f2187d.f17ca8",
-        "influxdb": "8053ff33aac82fb9",
-        "name": "Store in Influx",
-        "measurement": "airQuality",
-        "precision": "",
-        "retentionPolicy": "",
-        "database": "database",
-        "precisionV18FluxV20": "ms",
-        "retentionPolicyV18Flux": "",
-        "org": "abacus-demo",
-        "bucket": "airQuality",
-        "x": 1820,
-        "y": 960,
-        "wires": []
-    },
-    {
-        "id": "c3960a765f2a6849",
-        "type": "catch",
-        "z": "f6f2187d.f17ca8",
-        "name": "AQI http request failure",
-        "scope": [
-            "7738f0004d9fb9cb"
-        ],
-        "uncaught": false,
-        "x": 1520,
-        "y": 760,
-        "wires": [
-            [
-                "93560c72ee77c826"
-            ]
-        ]
-    },
-    {
-        "id": "93560c72ee77c826",
-        "type": "debug",
-        "z": "f6f2187d.f17ca8",
-        "name": "HTTP Failed",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1510,
-        "y": 820,
         "wires": []
     },
     {
@@ -759,289 +670,9 @@
         "wires": []
     },
     {
-        "id": "7d04c47483cd8cbd",
-        "type": "http in",
-        "z": "f6f2187d.f17ca8",
-        "name": "Get Info",
-        "url": "/submit",
-        "method": "post",
-        "upload": false,
-        "skipBodyParsing": false,
-        "swaggerDoc": "",
-        "x": 1670,
-        "y": 140,
-        "wires": [
-            [
-                "9f9bc234e299eac7"
-            ]
-        ]
-    },
-    {
-        "id": "9f9bc234e299eac7",
-        "type": "json",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "property": "payload",
-        "action": "obj",
-        "pretty": false,
-        "x": 1670,
-        "y": 180,
-        "wires": [
-            [
-                "9dbeb9c5f60467d5"
-            ]
-        ]
-    },
-    {
-        "id": "9dbeb9c5f60467d5",
-        "type": "function",
-        "z": "f6f2187d.f17ca8",
-        "name": "Get information",
-        "func": "/*\nExpecting incoming msg.payload (JS object), e.g.\n{\n  \"region\": \"Lahore\",\n  \"airQuality\": \"2\",\n  \"weather\": \"1\",\n  \"timestamp\": \"2025-08-18T07:12:00Z\" // optional - ISO string\n}\n*/\n\n\n// normalize region -> bucket name\nconst region = msg.payload.region;\n\n// get numeric values (allow direct numeric fallback)\nconst airQuality = Number(msg.payload.airQuality);\n\nconst weather = Number(msg.payload.weather);\n\n\n\nconst now       = new Date();\nconst oneHour   = 60 * 60 * 1000;\nconst start     = new Date(now.getTime() - oneHour).toISOString();\nconst stop      = now.toISOString();\nconst pointTime = now.toISOString();  // this will be your _time\n\nmsg.airQualityPayload = [\n  {\n\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    airQuality,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"AirQuality\",\n  }\n];\n\nmsg.weatherPayload = [\n  {\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    weather,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"weather\",\n  }\n];\n\nmsg.curCity = region;\nmsg.payload = region;\nreturn msg;\n\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1700,
-        "y": 240,
-        "wires": [
-            [
-                "4c1a0ec1a09c4abc",
-                "3d6f7608079e550c"
-            ]
-        ]
-    },
-    {
-        "id": "4c1a0ec1a09c4abc",
-        "type": "change",
-        "z": "f6f2187d.f17ca8",
-        "name": "weatherPayload",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "weatherPayload",
-                "tot": "msg"
-            },
-            {
-                "t": "set",
-                "p": "measurement",
-                "pt": "msg",
-                "to": "Weather",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 1620,
-        "y": 300,
-        "wires": [
-            [
-                "048c9a6fbad39ae0",
-                "d81eb67a02d11379"
-            ]
-        ]
-    },
-    {
-        "id": "b689bd55e95aa079",
-        "type": "change",
-        "z": "f6f2187d.f17ca8",
-        "name": "airQualityPayload",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "airQualityPayload",
-                "tot": "msg"
-            },
-            {
-                "t": "set",
-                "p": "measurement",
-                "pt": "msg",
-                "to": "AirQuality",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 1550,
-        "y": 520,
-        "wires": [
-            [
-                "048c9a6fbad39ae0",
-                "e25776cb87091db5"
-            ]
-        ]
-    },
-    {
-        "id": "048c9a6fbad39ae0",
-        "type": "switch",
-        "z": "f6f2187d.f17ca8",
-        "name": "Check Current City",
-        "property": "curCity",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "Lahore",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "Islamabad",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "Karachi",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 3,
-        "x": 1630,
-        "y": 360,
-        "wires": [
-            [
-                "5765de39e93813e8"
-            ],
-            [
-                "ec18dbe0a3dc6668"
-            ],
-            [
-                "92a589b7aef2bf37"
-            ]
-        ]
-    },
-    {
-        "id": "ec18dbe0a3dc6668",
-        "type": "influxdb out",
-        "z": "f6f2187d.f17ca8",
-        "influxdb": "8053ff33aac82fb9",
-        "name": "Islamabad- Influx",
-        "measurement": "",
-        "precision": "",
-        "retentionPolicy": "",
-        "database": "database",
-        "precisionV18FluxV20": "ms",
-        "retentionPolicyV18Flux": "",
-        "org": "abacus-demo",
-        "bucket": "islamabadFeelsLike",
-        "x": 1910,
-        "y": 560,
-        "wires": []
-    },
-    {
-        "id": "92a589b7aef2bf37",
-        "type": "influxdb out",
-        "z": "f6f2187d.f17ca8",
-        "influxdb": "8053ff33aac82fb9",
-        "name": "Karachi- Influx",
-        "measurement": "",
-        "precision": "",
-        "retentionPolicy": "",
-        "database": "database",
-        "precisionV18FluxV20": "ms",
-        "retentionPolicyV18Flux": "",
-        "org": "abacus-demo",
-        "bucket": "karachiFeelsLike",
-        "x": 1900,
-        "y": 600,
-        "wires": []
-    },
-    {
-        "id": "5765de39e93813e8",
-        "type": "influxdb out",
-        "z": "f6f2187d.f17ca8",
-        "influxdb": "8053ff33aac82fb9",
-        "name": "Lahore- Influx",
-        "measurement": "",
-        "precision": "",
-        "retentionPolicy": "",
-        "database": "database",
-        "precisionV18FluxV20": "ms",
-        "retentionPolicyV18Flux": "",
-        "org": "abacus-demo",
-        "bucket": "lahoreFeelsLike",
-        "x": 1900,
-        "y": 520,
-        "wires": []
-    },
-    {
-        "id": "3d6f7608079e550c",
-        "type": "debug",
-        "z": "f6f2187d.f17ca8",
-        "name": "debug 1",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 2000,
-        "y": 260,
-        "wires": []
-    },
-    {
-        "id": "d81eb67a02d11379",
-        "type": "delay",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "pauseType": "delay",
-        "timeout": "5",
-        "timeoutUnits": "seconds",
-        "rate": "1",
-        "nbRateUnits": "1",
-        "rateUnits": "second",
-        "randomFirst": "1",
-        "randomLast": "5",
-        "randomUnits": "seconds",
-        "drop": false,
-        "allowrate": false,
-        "outputs": 1,
-        "x": 1540,
-        "y": 480,
-        "wires": [
-            [
-                "b689bd55e95aa079"
-            ]
-        ]
-    },
-    {
-        "id": "e25776cb87091db5",
-        "type": "debug",
-        "z": "f6f2187d.f17ca8",
-        "name": "debug 2",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1980,
-        "y": 400,
-        "wires": []
-    },
-    {
         "id": "6e66f4f1265ef5b8",
         "type": "inject",
         "z": "f6f2187d.f17ca8",
-        "d": true,
         "name": "create timestamp - Air Quality",
         "props": [
             {
@@ -1678,10 +1309,415 @@
         "wires": []
     },
     {
-        "id": "37f928be94b599f3",
+        "id": "ebad572527a63bc8",
         "type": "inject",
         "z": "f6f2187d.f17ca8",
         "d": true,
+        "name": "create timestamp - Air quality",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1370,
+        "y": 780,
+        "wires": [
+            [
+                "7738f0004d9fb9cb"
+            ]
+        ]
+    },
+    {
+        "id": "7738f0004d9fb9cb",
+        "type": "http request",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=52.52&longitude=13.41&hourly=pm10,pm2_5&current=european_aqi&domains=cams_europe",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1410,
+        "y": 840,
+        "wires": [
+            [
+                "65199b59328b6ec5"
+            ]
+        ]
+    },
+    {
+        "id": "65199b59328b6ec5",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "extract air quality",
+        "func": "// inside your Function node\nconst now       = new Date();\nconst oneHour   = 60 * 60 * 1000;\nconst start     = new Date(now.getTime() - oneHour).toISOString();\nconst stop      = now.toISOString();\nconst pointTime = now.toISOString();  // this will be your _time\n\nmsg.payload = [\n  {\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    msg.payload.current.european_aqi,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"AQI\",\n\n    // your tag column\n    region: \"Europe\",  // e.g. \"London\"\n    unit: \"μg/m³\"\n  }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1410,
+        "y": 900,
+        "wires": [
+            [
+                "6703970d25286f18"
+            ]
+        ]
+    },
+    {
+        "id": "6703970d25286f18",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Store in Influx",
+        "measurement": "airQuality",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "airQuality",
+        "x": 1400,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "c3960a765f2a6849",
+        "type": "catch",
+        "z": "f6f2187d.f17ca8",
+        "name": "AQI http request failure",
+        "scope": [
+            "7738f0004d9fb9cb"
+        ],
+        "uncaught": false,
+        "x": 1180,
+        "y": 920,
+        "wires": [
+            [
+                "93560c72ee77c826"
+            ]
+        ]
+    },
+    {
+        "id": "93560c72ee77c826",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "HTTP Failed",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1090,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "7d04c47483cd8cbd",
+        "type": "http in",
+        "z": "c8dca1c07927e80d",
+        "name": "Get Info",
+        "url": "/submit",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 565,
+        "y": 171.1999969482422,
+        "wires": [
+            [
+                "9f9bc234e299eac7"
+            ]
+        ]
+    },
+    {
+        "id": "9f9bc234e299eac7",
+        "type": "json",
+        "z": "c8dca1c07927e80d",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 565,
+        "y": 211.1999969482422,
+        "wires": [
+            [
+                "9dbeb9c5f60467d5"
+            ]
+        ]
+    },
+    {
+        "id": "9dbeb9c5f60467d5",
+        "type": "function",
+        "z": "c8dca1c07927e80d",
+        "name": "Get information",
+        "func": "/*\nExpecting incoming msg.payload (JS object), e.g.\n{\n  \"region\": \"Lahore\",\n  \"airQuality\": \"2\",\n  \"weather\": \"1\",\n  \"timestamp\": \"2025-08-18T07:12:00Z\" // optional - ISO string\n}\n*/\n\n\n// normalize region -> bucket name\nconst region = msg.payload.region;\n\n// get numeric values (allow direct numeric fallback)\nconst airQuality = Number(msg.payload.airQuality);\n\nconst weather = Number(msg.payload.weather);\n\n\n\nconst now       = new Date();\nconst oneHour   = 60 * 60 * 1000;\nconst start     = new Date(now.getTime() - oneHour).toISOString();\nconst stop      = now.toISOString();\nconst pointTime = now.toISOString();  // this will be your _time\n\nmsg.airQualityPayload = [\n  {\n\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    airQuality,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"AirQuality\",\n  }\n];\n\nmsg.weatherPayload = [\n  {\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    weather,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"weather\",\n  }\n];\n\nmsg.curCity = region;\nmsg.payload = region;\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 625,
+        "y": 271.1999969482422,
+        "wires": [
+            [
+                "4c1a0ec1a09c4abc",
+                "3d6f7608079e550c"
+            ]
+        ]
+    },
+    {
+        "id": "4c1a0ec1a09c4abc",
+        "type": "change",
+        "z": "c8dca1c07927e80d",
+        "name": "weatherPayload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "weatherPayload",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "measurement",
+                "pt": "msg",
+                "to": "Weather",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 545,
+        "y": 331.1999969482422,
+        "wires": [
+            [
+                "048c9a6fbad39ae0",
+                "d81eb67a02d11379"
+            ]
+        ]
+    },
+    {
+        "id": "b689bd55e95aa079",
+        "type": "change",
+        "z": "c8dca1c07927e80d",
+        "name": "airQualityPayload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "airQualityPayload",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "measurement",
+                "pt": "msg",
+                "to": "AirQuality",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 485,
+        "y": 551.1999969482422,
+        "wires": [
+            [
+                "048c9a6fbad39ae0",
+                "e25776cb87091db5"
+            ]
+        ]
+    },
+    {
+        "id": "048c9a6fbad39ae0",
+        "type": "switch",
+        "z": "c8dca1c07927e80d",
+        "name": "Check Current City",
+        "property": "curCity",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Lahore",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Islamabad",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Karachi",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 565,
+        "y": 391.1999969482422,
+        "wires": [
+            [
+                "5765de39e93813e8"
+            ],
+            [
+                "ec18dbe0a3dc6668"
+            ],
+            [
+                "92a589b7aef2bf37"
+            ]
+        ]
+    },
+    {
+        "id": "ec18dbe0a3dc6668",
+        "type": "influxdb out",
+        "z": "c8dca1c07927e80d",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Islamabad- Influx",
+        "measurement": "",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "islamabadFeelsLike",
+        "x": 845,
+        "y": 591.1999969482422,
+        "wires": []
+    },
+    {
+        "id": "92a589b7aef2bf37",
+        "type": "influxdb out",
+        "z": "c8dca1c07927e80d",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Karachi- Influx",
+        "measurement": "",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "karachiFeelsLike",
+        "x": 825,
+        "y": 631.1999969482422,
+        "wires": []
+    },
+    {
+        "id": "5765de39e93813e8",
+        "type": "influxdb out",
+        "z": "c8dca1c07927e80d",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Lahore- Influx",
+        "measurement": "",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "lahoreFeelsLike",
+        "x": 825,
+        "y": 551.1999969482422,
+        "wires": []
+    },
+    {
+        "id": "3d6f7608079e550c",
+        "type": "debug",
+        "z": "c8dca1c07927e80d",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 905,
+        "y": 291.1999969482422,
+        "wires": []
+    },
+    {
+        "id": "d81eb67a02d11379",
+        "type": "delay",
+        "z": "c8dca1c07927e80d",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 445,
+        "y": 511.1999969482422,
+        "wires": [
+            [
+                "b689bd55e95aa079"
+            ]
+        ]
+    },
+    {
+        "id": "e25776cb87091db5",
+        "type": "debug",
+        "z": "c8dca1c07927e80d",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 885,
+        "y": 431.1999969482422,
+        "wires": []
+    },
+    {
+        "id": "37f928be94b599f3",
+        "type": "inject",
+        "z": "c8dca1c07927e80d",
         "name": "False Data Generator",
         "props": [
             {
@@ -1692,15 +1728,15 @@
                 "vt": "str"
             }
         ],
-        "repeat": "30",
+        "repeat": "45",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 1380,
-        "y": 140,
+        "x": 365,
+        "y": 271.1999969482422,
         "wires": [
             [
                 "372eda4353591820"
@@ -1710,7 +1746,7 @@
     {
         "id": "372eda4353591820",
         "type": "function",
-        "z": "f6f2187d.f17ca8",
+        "z": "c8dca1c07927e80d",
         "name": "Create Randomized Data",
         "func": "/*\nExpecting incoming msg.payload (JS object), e.g.\n{\n  \"region\": \"Lahore\",\n  \"airQuality\": \"2\",\n  \"weather\": \"1\",\n  \"timestamp\": \"2025-08-18T07:12:00Z\" // optional - ISO string\n}\n*/\nconst cities = [\"Lahore\", \"Islamabad\", \"Karachi\"];\nconst randomCityIndex = Math.floor(Math.random() * 3);\n// normalize region -> bucket name\nconst region = cities[randomCityIndex];\nlet maxSatisfactionA;\nlet maxSatisfactionW;\nif (region == \"Lahore\")\n{\n  maxSatisfactionA = flow.get(\"lahoreMaxLocalSatisfactionA\");\n  maxSatisfactionW = flow.get(\"lahoreMaxLocalSatisfactionW\");\n\n}\nelse if (region == \"Islamabad\")\n{\n  maxSatisfactionA = flow.get(\"islamabadMaxLocalSatisfactionA\");\n  maxSatisfactionW = flow.get(\"islamabadMaxLocalSatisfactionW\");\n\n}\nelse \n{\n  maxSatisfactionA = flow.get(\"karachiMaxLocalSatisfactionA\");\n  maxSatisfactionW = flow.get(\"karachiMaxLocalSatisfactionW\");\n\n}\n\n// get numeric values (allow direct numeric fallback)\nconst airQuality = Math.floor(Math.random() * maxSatisfactionA) + 1;\n\nconst weather = Math.floor(Math.random() * maxSatisfactionW) + 1;\n\n\n\nconst now       = new Date();\nconst oneHour   = 60 * 60 * 1000;\nconst start     = new Date(now.getTime() - oneHour).toISOString();\nconst stop      = now.toISOString();\nconst pointTime = now.toISOString();  // this will be your _time\n\nmsg.airQualityPayload = [\n  {\n\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    airQuality,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"AirQuality\",\n  }\n];\n\nmsg.weatherPayload = [\n  {\n    // these two “Influx-specific” fields map to your Flux/result metadata\n    result:    \"\",\n    table:     0,\n\n    // Flux range columns\n    _start:    start,\n    _stop:     stop,\n\n    // the actual timestamp of this measurement\n    _time:     pointTime,\n\n    // the raw value and its “field” name\n    _value:    weather,\n    _field:    \"value\",\n\n    // measurement name\n    _measurement: \"weather\",\n  }\n];\n\nmsg.curCity = region;\nmsg.payload = region;\nreturn msg;\n\n",
         "outputs": 1,
@@ -1719,8 +1755,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1390,
-        "y": 200,
+        "x": 385,
+        "y": 331.1999969482422,
         "wires": [
             [
                 "4c1a0ec1a09c4abc",
@@ -1731,8 +1767,7 @@
     {
         "id": "24da58f187d5609d",
         "type": "inject",
-        "z": "f6f2187d.f17ca8",
-        "d": true,
+        "z": "c8dca1c07927e80d",
         "name": "Random general View Generator",
         "props": [
             {
@@ -1746,8 +1781,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 1180,
-        "y": 40,
+        "x": 225,
+        "y": 171.1999969482422,
         "wires": [
             [
                 "46e72e66dfbe717f"
@@ -1757,7 +1792,7 @@
     {
         "id": "46e72e66dfbe717f",
         "type": "function",
-        "z": "f6f2187d.f17ca8",
+        "z": "c8dca1c07927e80d",
         "name": "function 1",
         "func": "flow.set(\"lahoreMaxLocalSatisfactionW\", Math.floor(Math.random() * 10) + 1);\nflow.set(\"islamabadMaxLocalSatisfactionW\", Math.floor(Math.random() * 10) + 1);\nflow.set(\"karachiMaxLocalSatisfactionW\", Math.floor(Math.random() * 10) + 1);\n\nflow.set(\"lahoreMaxLocalSatisfactionA\", Math.floor(Math.random() * 10) + 1);\nflow.set(\"islamabadMaxLocalSatisfactionA\", Math.floor(Math.random() * 10) + 1);\nflow.set(\"karachiMaxLocalSatisfactionA\", Math.floor(Math.random() * 10) + 1);\n\nreturn msg;",
         "outputs": 1,
@@ -1766,8 +1801,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1100,
-        "y": 120,
+        "x": 65,
+        "y": 251.1999969482422,
         "wires": [
             [
                 "5e65ec7e30cf55d7"
@@ -1777,7 +1812,7 @@
     {
         "id": "5e65ec7e30cf55d7",
         "type": "debug",
-        "z": "f6f2187d.f17ca8",
+        "z": "c8dca1c07927e80d",
         "name": "Views Reset",
         "active": true,
         "tosidebar": true,
@@ -1787,12 +1822,731 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1150,
-        "y": 180,
+        "x": 125,
+        "y": 311.1999969482422,
         "wires": []
     },
     {
-        "id": "948bbb2198c950a0",
+        "id": "94b29647aac120f1",
+        "type": "influxdb in",
+        "z": "90b264d3d8642dfb",
+        "influxdb": "b964f598819af5c0",
+        "name": "Weather_AQI-Query-Islamabad",
+        "query": "temp = from(bucket: \"islamabadWeather\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"islamabadAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "abacus-demo",
+        "x": 230,
+        "y": 300,
+        "wires": [
+            [
+                "06fb1b4a1a5f57bc"
+            ]
+        ]
+    },
+    {
+        "id": "dc12c150c99ce7f1",
+        "type": "inject",
+        "z": "90b264d3d8642dfb",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 210,
+        "y": 240,
+        "wires": [
+            [
+                "94b29647aac120f1"
+            ]
+        ]
+    },
+    {
+        "id": "7797df947d0b9d91",
+        "type": "http request",
+        "z": "90b264d3d8642dfb",
+        "name": "POST to Flask (Python)",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://192.168.100.193:5000/postData",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 230,
+        "y": 420,
+        "wires": [
+            [
+                "846f3fff8ef2f2ab"
+            ]
+        ]
+    },
+    {
+        "id": "06fb1b4a1a5f57bc",
+        "type": "function",
+        "z": "90b264d3d8642dfb",
+        "name": "parse",
+        "func": "// msg.payload is an array of points from union()\nconst city = \"Islamabad\";\n\nconst tempPoints = [];\nconst aqiPoints = [];\n\n(msg.payload || []).forEach(p => {\n  // p._time (or p.time) and p._value are typical Influx fields\n  const time = p._time || p.time;\n  const value = p._value;\n  if (p.source === \"temperature\") {\n    tempPoints.push({ time, value });\n  } else if (p.source === \"aqi\") {\n    aqiPoints.push({ time, value });\n  }\n});\n\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = {\n  city,\n  temperature: tempPoints,\n  aqi: aqiPoints\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 190,
+        "y": 380,
+        "wires": [
+            [
+                "7797df947d0b9d91"
+            ]
+        ]
+    },
+    {
+        "id": "01cc762b7915f388",
+        "type": "influxdb in",
+        "z": "90b264d3d8642dfb",
+        "influxdb": "b964f598819af5c0",
+        "name": "Weather-Query-Lahore",
+        "query": "from(bucket: \"lahoreWeather\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Temperature\")\n  |> filter(fn: (r) => r[\"_field\"] == \"_value\")\n  |> yield(name: \"raw\")",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "abacus-demo",
+        "x": 250,
+        "y": 620,
+        "wires": [
+            [
+                "63fc6d19fc49ca66"
+            ]
+        ]
+    },
+    {
+        "id": "235f6f587e0c4596",
+        "type": "http request",
+        "z": "90b264d3d8642dfb",
+        "name": "POST to Flask (Python)",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://192.168.100.193:5000/postData",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 250,
+        "y": 740,
+        "wires": [
+            [
+                "b3284e3a87875d11"
+            ]
+        ]
+    },
+    {
+        "id": "63fc6d19fc49ca66",
+        "type": "function",
+        "z": "90b264d3d8642dfb",
+        "name": "parse",
+        "func": "// Node-RED Function node\n// Assume msg.payload is an array of points returned by the query\nconst city = \"Lahore\";\nconst measurement = \"Weather\";\nconst points = msg.payload.map(p => ({\n  time: p._time,       // or p.time depending on node output\n  temp: p._value, // adjust to your fields,\n}));\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = { city, measurement, points };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 210,
+        "y": 680,
+        "wires": [
+            [
+                "235f6f587e0c4596"
+            ]
+        ]
+    },
+    {
+        "id": "b3284e3a87875d11",
+        "type": "influxdb in",
+        "z": "90b264d3d8642dfb",
+        "influxdb": "b964f598819af5c0",
+        "name": "Weather-Query-Karachi",
+        "query": "from(bucket: \"karachiWeather\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Temperature\")\n  |> filter(fn: (r) => r[\"_field\"] == \"_value\")\n  |> yield(name: \"raw\")",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "abacus-demo",
+        "x": 570,
+        "y": 620,
+        "wires": [
+            [
+                "efe4cd1709bcd4cb"
+            ]
+        ]
+    },
+    {
+        "id": "aa4b787efb2e1ca2",
+        "type": "http request",
+        "z": "90b264d3d8642dfb",
+        "name": "POST to Flask (Python)",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://192.168.100.193:5000/postData",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 580,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "efe4cd1709bcd4cb",
+        "type": "function",
+        "z": "90b264d3d8642dfb",
+        "name": "parse",
+        "func": "// Node-RED Function node\n// Assume msg.payload is an array of points returned by the query\nconst city = \"Karachi\";\nconst measurement = \"Weather\";\n\nconst points = msg.payload.map(p => ({\n  time: p._time,       // or p.time depending on node output\n  temp: p._value, // adjust to your fields,\n}));\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = { city, measurement, points };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 680,
+        "wires": [
+            [
+                "aa4b787efb2e1ca2"
+            ]
+        ]
+    },
+    {
+        "id": "846f3fff8ef2f2ab",
+        "type": "influxdb in",
+        "z": "90b264d3d8642dfb",
+        "influxdb": "b964f598819af5c0",
+        "name": "Weather+AQI-Query-Lahore",
+        "query": "temp = from(bucket: \"lahoreWeather\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"lahoreAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "abacus-demo",
+        "x": 540,
+        "y": 300,
+        "wires": [
+            [
+                "9e11c397ded95633"
+            ]
+        ]
+    },
+    {
+        "id": "64ce6cf6f287c54c",
+        "type": "http request",
+        "z": "90b264d3d8642dfb",
+        "name": "POST to Flask (Python)",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://192.168.100.193:5000/postData",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 530,
+        "y": 420,
+        "wires": [
+            [
+                "573ea5efc7efe6f0"
+            ]
+        ]
+    },
+    {
+        "id": "9e11c397ded95633",
+        "type": "function",
+        "z": "90b264d3d8642dfb",
+        "name": "parse",
+        "func": "// msg.payload is an array of points from union()\nconst city = \"Lahore\";\n\nconst tempPoints = [];\nconst aqiPoints = [];\n\n(msg.payload || []).forEach(p => {\n  // p._time (or p.time) and p._value are typical Influx fields\n  const time = p._time || p.time;\n  const value = p._value;\n  if (p.source === \"temperature\") {\n    tempPoints.push({ time, value });\n  } else if (p.source === \"aqi\") {\n    aqiPoints.push({ time, value });\n  }\n});\n\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = {\n  city,\n  temperature: tempPoints,\n  aqi: aqiPoints\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 360,
+        "wires": [
+            [
+                "64ce6cf6f287c54c"
+            ]
+        ]
+    },
+    {
+        "id": "23456dd6d221b811",
+        "type": "debug",
+        "z": "90b264d3d8642dfb",
+        "name": "SENT to python",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 200,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "573ea5efc7efe6f0",
+        "type": "influxdb in",
+        "z": "90b264d3d8642dfb",
+        "influxdb": "b964f598819af5c0",
+        "name": "Weather+AQI-Query-Karachi",
+        "query": "temp = from(bucket: \"karachiWeather\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"karachiAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "abacus-demo",
+        "x": 820,
+        "y": 300,
+        "wires": [
+            [
+                "22e0a54ebd11a245"
+            ]
+        ]
+    },
+    {
+        "id": "fa2331d3d928e12d",
+        "type": "http request",
+        "z": "90b264d3d8642dfb",
+        "name": "POST to Flask (Python)",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://192.168.100.193:5000/postData",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 810,
+        "y": 420,
+        "wires": [
+            [
+                "23456dd6d221b811"
+            ]
+        ]
+    },
+    {
+        "id": "22e0a54ebd11a245",
+        "type": "function",
+        "z": "90b264d3d8642dfb",
+        "name": "parse",
+        "func": "// msg.payload is an array of points from union()\nconst city = \"Karachi\";\n\nconst tempPoints = [];\nconst aqiPoints = [];\n\n(msg.payload || []).forEach(p => {\n  // p._time (or p.time) and p._value are typical Influx fields\n  const time = p._time || p.time;\n  const value = p._value;\n  if (p.source === \"temperature\") {\n    tempPoints.push({ time, value });\n  } else if (p.source === \"aqi\") {\n    aqiPoints.push({ time, value });\n  }\n});\n\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = {\n  city,\n  temperature: tempPoints,\n  aqi: aqiPoints\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 360,
+        "wires": [
+            [
+                "fa2331d3d928e12d"
+            ]
+        ]
+    },
+    {
+        "id": "774e768359d9c7ec",
+        "type": "http in",
+        "z": "30f9ed914c390e37",
+        "name": "Get Prediction",
+        "url": "/predictions",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 80,
+        "wires": [
+            [
+                "8ed6fd4d1da6b280"
+            ]
+        ]
+    },
+    {
+        "id": "8ed6fd4d1da6b280",
+        "type": "json",
+        "z": "30f9ed914c390e37",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": true,
+        "x": 150,
+        "y": 160,
+        "wires": [
+            [
+                "b439ad8cd7d7725b"
+            ]
+        ]
+    },
+    {
+        "id": "b439ad8cd7d7725b",
+        "type": "function",
+        "z": "30f9ed914c390e37",
+        "name": "Parse",
+        "func": "// Node-RED Function node\n\nconst data       = msg.payload;\nconst now        = new Date();\nconst oneHour    = 60 * 60 * 1000;\nconst start      = new Date(now.getTime() - oneHour).toISOString();\nconst stop       = now.toISOString();\nconst pointTime  = now.toISOString();  // the actual _time for Influx\n\nconst city = data.city || \"Unknown\";\nconst preds = data.predictions || {};\nflow.set(\"curCity\", city)\n// weather satisfaction\nif (preds.weather_satisfaction !== undefined) {\n    msg.weatherData = {\n        result: \"\",\n        table: 0,\n        _start: start,\n        _stop: stop,\n        _time: pointTime,\n        _value: preds.weather_satisfaction,\n        _field: \"value\",\n        _measurement: \"weather_satisfaction\",\n        city: city   // optional tag\n    };\n}\n\n// air quality satisfaction\nif (preds.air_quality_satisfaction !== undefined) {\n    msg.airQualityData = {\n        result: \"\",\n        table: 0,\n        _start: start,\n        _stop: stop,\n        _time: pointTime,\n        _value: preds.air_quality_satisfaction,\n        _field: \"value\",\n        _measurement: \"air_quality_satisfaction\",\n        city: city   // optional tag\n    };\n}\n\nmsg.payload = msg.weatherData;\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 130,
+        "y": 220,
+        "wires": [
+            [
+                "61909b2b44fb0341",
+                "7325af40fbeeccd7"
+            ]
+        ]
+    },
+    {
+        "id": "47cf2028561bc542",
+        "type": "influxdb out",
+        "z": "30f9ed914c390e37",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Lahore- Influx",
+        "measurement": "Temperature",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "lahorePredictions",
+        "x": 180,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "7325af40fbeeccd7",
+        "type": "switch",
+        "z": "30f9ed914c390e37",
+        "name": "Check Current City",
+        "property": "curCity",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Lahore",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Islamabad",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Karachi",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 150,
+        "y": 300,
+        "wires": [
+            [
+                "af4c1f6a3a50ea6a",
+                "47cf2028561bc542",
+                "26cb729c030ba747"
+            ],
+            [
+                "8bd118309799d3ad",
+                "af4c1f6a3a50ea6a",
+                "26cb729c030ba747"
+            ],
+            [
+                "8d5d6e8104d1f96b",
+                "af4c1f6a3a50ea6a",
+                "26cb729c030ba747"
+            ]
+        ]
+    },
+    {
+        "id": "8bd118309799d3ad",
+        "type": "influxdb out",
+        "z": "30f9ed914c390e37",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Islamabad- Influx",
+        "measurement": "Temperature",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "islamabadPredictions",
+        "x": 190,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "8d5d6e8104d1f96b",
+        "type": "influxdb out",
+        "z": "30f9ed914c390e37",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Karachi- Influx",
+        "measurement": "Temperature",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "karachiPredictions",
+        "x": 180,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "af4c1f6a3a50ea6a",
+        "type": "function",
+        "z": "30f9ed914c390e37",
+        "name": "Message",
+        "func": "return msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 460,
+        "wires": [
+            [
+                "03a125d2756ee9ed"
+            ]
+        ]
+    },
+    {
+        "id": "03a125d2756ee9ed",
+        "type": "debug",
+        "z": "30f9ed914c390e37",
+        "name": "Posting back to influx from python",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "61909b2b44fb0341",
+        "type": "debug",
+        "z": "30f9ed914c390e37",
+        "name": "prediction received",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 410,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "5a9eb9f781b2c161",
+        "type": "change",
+        "z": "30f9ed914c390e37",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "airQualityData",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 560,
+        "y": 300,
+        "wires": [
+            [
+                "3cbcd977e0e1c2ae"
+            ]
+        ]
+    },
+    {
+        "id": "3cbcd977e0e1c2ae",
+        "type": "switch",
+        "z": "30f9ed914c390e37",
+        "name": "Check Current City",
+        "property": "curCity",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Lahore",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Islamabad",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Karachi",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 750,
+        "y": 300,
+        "wires": [
+            [
+                "d2a416beba8aa00a",
+                "af4c1f6a3a50ea6a"
+            ],
+            [
+                "c43d30b8d9aaf29f",
+                "af4c1f6a3a50ea6a"
+            ],
+            [
+                "84922131d0b7d7c6",
+                "af4c1f6a3a50ea6a"
+            ]
+        ]
+    },
+    {
+        "id": "d2a416beba8aa00a",
+        "type": "influxdb out",
+        "z": "30f9ed914c390e37",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Lahore- Influx",
+        "measurement": "AQI",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "lahorePredictions",
+        "x": 940,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "c43d30b8d9aaf29f",
+        "type": "influxdb out",
+        "z": "30f9ed914c390e37",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Islamabad- Influx",
+        "measurement": "AQI",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "islamabadPredictions",
+        "x": 950,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "84922131d0b7d7c6",
+        "type": "influxdb out",
+        "z": "30f9ed914c390e37",
+        "influxdb": "8053ff33aac82fb9",
+        "name": "Karachi- Influx",
+        "measurement": "AQI",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "abacus-demo",
+        "bucket": "karachiPredictions",
+        "x": 940,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "26cb729c030ba747",
+        "type": "delay",
+        "z": "30f9ed914c390e37",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 380,
+        "y": 300,
+        "wires": [
+            [
+                "5a9eb9f781b2c161"
+            ]
+        ]
+    },
+    {
+        "id": "dc9c2b109fd67aae",
         "type": "global-config",
         "env": [],
         "modules": {
