@@ -1,3 +1,5 @@
+
+
 Grafana Code
 
 AQI
@@ -41,3 +43,20 @@ from(bucket: "islamabadFeelsLike")
   |> map(fn: (r) => ({ r with _time: r._stop })) // put the point at window end (or use _start)
   |> group(columns: ["_measurement"])        // re-group for plotting if needed
   |> yield(name: "sliding_time_window_mean")
+
+
+Predicted Local Views
+
+from(bucket: "lahorePredictions")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "Temperature")
+  |> filter(fn: (r) => r["_field"] == "_value")
+  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+  |> yield(name: "raw")
+
+from(bucket: "lahorePredictions")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "AQI")
+  |> filter(fn: (r) => r["_field"] == "_value")
+  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+  |> yield(name: "raw")
