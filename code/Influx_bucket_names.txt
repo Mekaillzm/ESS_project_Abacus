@@ -1,0 +1,12 @@
+Names of working buckets:
+-islamabadAQI
+-islabadFeelsLike
+-islamabadPredictions
+-islamabadWeather
+-karachiAQI
+-karachiFeelsLike
+-karachiPredictions
+-lahoreAQI
+-lahoreWeather
+-lahorePredictions
+-lahoreFeelsLike
