@@ -1516,8 +1516,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 545,
-        "y": 331.1999969482422,
+        "x": 600,
+        "y": 340,
         "wires": [
             [
                 "048c9a6fbad39ae0",
@@ -1587,8 +1587,8 @@
         "checkall": "true",
         "repair": false,
         "outputs": 3,
-        "x": 565,
-        "y": 391.1999969482422,
+        "x": 590,
+        "y": 400,
         "wires": [
             [
                 "5765de39e93813e8"
@@ -1728,7 +1728,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "45",
+        "repeat": "600",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -1832,7 +1832,7 @@
         "z": "90b264d3d8642dfb",
         "influxdb": "b964f598819af5c0",
         "name": "Weather_AQI-Query-Islamabad",
-        "query": "temp = from(bucket: \"islamabadWeather\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"islamabadAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
+        "query": "temp = from(bucket: \"islamabadWeather\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"islamabadAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
         "rawOutput": false,
         "precision": "",
         "retentionPolicy": "",
@@ -1882,7 +1882,7 @@
         "method": "POST",
         "ret": "obj",
         "paytoqs": "ignore",
-        "url": "http://192.168.100.193:5000/postData",
+        "url": "http://192.168.137.183:5000/postData",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -1894,7 +1894,8 @@
         "y": 420,
         "wires": [
             [
-                "846f3fff8ef2f2ab"
+                "1f458404eec6c036",
+                "23456dd6d221b811"
             ]
         ]
     },
@@ -2048,12 +2049,12 @@
         "z": "90b264d3d8642dfb",
         "influxdb": "b964f598819af5c0",
         "name": "Weather+AQI-Query-Lahore",
-        "query": "temp = from(bucket: \"lahoreWeather\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"lahoreAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
+        "query": "temp = from(bucket: \"lahoreWeather\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"lahoreAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
         "rawOutput": false,
         "precision": "",
         "retentionPolicy": "",
         "org": "abacus-demo",
-        "x": 540,
+        "x": 680,
         "y": 300,
         "wires": [
             [
@@ -2069,7 +2070,7 @@
         "method": "POST",
         "ret": "obj",
         "paytoqs": "ignore",
-        "url": "http://192.168.100.193:5000/postData",
+        "url": "http://192.168.137.183:5000/postData",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -2077,11 +2078,12 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 530,
+        "x": 670,
         "y": 420,
         "wires": [
             [
-                "573ea5efc7efe6f0"
+                "a0e5afc8a6e8ce92",
+                "e4fe30c860339361"
             ]
         ]
     },
@@ -2097,7 +2099,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 470,
+        "x": 610,
         "y": 360,
         "wires": [
             [
@@ -2118,8 +2120,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 200,
-        "y": 480,
+        "x": 180,
+        "y": 520,
         "wires": []
     },
     {
@@ -2128,12 +2130,12 @@
         "z": "90b264d3d8642dfb",
         "influxdb": "b964f598819af5c0",
         "name": "Weather+AQI-Query-Karachi",
-        "query": "temp = from(bucket: \"karachiWeather\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"karachiAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
+        "query": "temp = from(bucket: \"karachiWeather\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"karachiAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
         "rawOutput": false,
         "precision": "",
         "retentionPolicy": "",
         "org": "abacus-demo",
-        "x": 820,
+        "x": 1100,
         "y": 300,
         "wires": [
             [
@@ -2149,7 +2151,7 @@
         "method": "POST",
         "ret": "obj",
         "paytoqs": "ignore",
-        "url": "http://192.168.100.193:5000/postData",
+        "url": "http://192.168.137.183:5000/postData",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -2157,11 +2159,11 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 810,
+        "x": 1090,
         "y": 420,
         "wires": [
             [
-                "23456dd6d221b811"
+                "97773b287f5166bb"
             ]
         ]
     },
@@ -2177,13 +2179,97 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 770,
+        "x": 1050,
         "y": 360,
         "wires": [
             [
                 "fa2331d3d928e12d"
             ]
         ]
+    },
+    {
+        "id": "1f458404eec6c036",
+        "type": "delay",
+        "z": "90b264d3d8642dfb",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 440,
+        "y": 360,
+        "wires": [
+            [
+                "846f3fff8ef2f2ab"
+            ]
+        ]
+    },
+    {
+        "id": "e4fe30c860339361",
+        "type": "delay",
+        "z": "90b264d3d8642dfb",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 880,
+        "y": 360,
+        "wires": [
+            [
+                "573ea5efc7efe6f0"
+            ]
+        ]
+    },
+    {
+        "id": "a0e5afc8a6e8ce92",
+        "type": "debug",
+        "z": "90b264d3d8642dfb",
+        "name": "SENT to python",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "97773b287f5166bb",
+        "type": "debug",
+        "z": "90b264d3d8642dfb",
+        "name": "SENT to python",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1060,
+        "y": 520,
+        "wires": []
     },
     {
         "id": "774e768359d9c7ec",
@@ -2199,6 +2285,7 @@
         "y": 80,
         "wires": [
             [
+                "61909b2b44fb0341",
                 "8ed6fd4d1da6b280"
             ]
         ]
@@ -2235,7 +2322,6 @@
         "y": 220,
         "wires": [
             [
-                "61909b2b44fb0341",
                 "7325af40fbeeccd7"
             ]
         ]
@@ -2546,7 +2632,7 @@
         ]
     },
     {
-        "id": "dc9c2b109fd67aae",
+        "id": "0ae67578893dedfb",
         "type": "global-config",
         "env": [],
         "modules": {
