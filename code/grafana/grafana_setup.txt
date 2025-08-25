@@ -1,1 +1,19 @@
+When setting up Grafana, do the following:
 
+Create a data source called InfluxDX.
+Important: Select Flux as the query language.
+
+Use your credentials for InlfuxDB.
+For reference, the previously used credentials are included below, though these are only valid on the original Docker container.
+
+InfluxDB credentials:
+Organisation: abacus-demo
+Username: amdin
+Password: admin123
+
+Ensure all the required buckets have been created in influxDB, as outlined by Influx_setup_info.txt
+
+Once done, create a new Dashboard.
+Go to Settings > JSON model
+Paste all code from model.json
+Press save dashboard
