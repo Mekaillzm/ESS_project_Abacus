@@ -1,6 +1,6 @@
 # ESS
 
-The ESS system simulates environmental data in real-time, all while gathering subjective local views as well.
+The ESS system is perfect for organizations in the tourism industry. It simulates environmental data in real-time, all while gathering subjective local views as well.
 
 This is coupled with a robust predictive system that uses past data to simulate what locals would be expected to feel.
 This immediate detection enables operators to act quickly, addressing issues before they escalate into broader dissatisfaction or tourist decline.
