@@ -3,7 +3,7 @@ When setting up Grafana, do the following:
 Create a data source called InfluxDX.
 Important: Select Flux as the query language.
 
-Use your credentials for InlfuxDB.
+Use your credentials for inlfuxdb.
 For reference, the previously used credentials are included below, though these are only valid on the original Docker container.
 
 InfluxDB credentials:
