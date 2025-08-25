@@ -9,7 +9,7 @@ Prerequisite libraries:
 
 Installation commands:
 pip install pandas numpy scikit-learn
-pip insatll flask
+pip install flask
 
 Secondly, download and run the code, ensuring a stable WiFi connection.
 
