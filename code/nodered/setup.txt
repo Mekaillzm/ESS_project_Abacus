@@ -1,0 +1,15 @@
+In your Node-RED dashboard, select Import and paste the code from flows.json.
+
+Go to the Flow "Influx to Python" and select the Node "Set url". Set msg.url to the url that flask_post_data2.py is active on. 
+This varies by the network used and can be obtained upon running flask_post_data2.py, after which it will appear in the output screen.
+
+For example, if the address is  http://0.0.0.0:5000/
+Then enter the url:  http://0.0.0.0:5000/postData
+
+Secondly, random number generators have been enabled to post pseudo-random user views. You may disable these by disabling the following nodes in "Flutter to Influx"
+Nodes to disable: "Random general View Generator", "False Data Generator"
+These do not impact the functionality of the Flutter app.
+
+Thirdly, ensure InfluxDB has been set up as outlined in Influx_setup.txt
+
+Finally, press deploy on all four flows.
