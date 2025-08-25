@@ -1,0 +1,2 @@
+This folder contains sample data for all influxDB buckets on 25-08-2025 18:25, for a duration of -24h (24 hours before that point up till that point in time).
+
