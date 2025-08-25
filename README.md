@@ -83,7 +83,7 @@ Prerequisite libraries:
 
 Installation commands:
 pip install pandas numpy scikit-learn
-pip insatll flask
+pip install flask
 
 Secondly, download all the code in the code/scikit-learn folder, keeping all code within the same folder. Ensuring a stable WiFi connection, run flusk_post_data2.py.
 
