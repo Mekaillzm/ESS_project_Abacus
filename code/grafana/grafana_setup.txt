@@ -1,6 +1,6 @@
 When setting up Grafana, do the following:
 
-Create a data source called InfluxDX.
+Create a data source called "inlfuxdb".
 Important: Select Flux as the query language.
 
 Use your credentials for inlfuxdb.
