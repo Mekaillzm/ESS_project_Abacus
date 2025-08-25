@@ -1,6 +1,7 @@
 
 
-Grafana Code
+Grafana template queries
+Written in Flux
 
 AQI
 from(bucket: "islamabadAQI")
