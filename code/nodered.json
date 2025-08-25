@@ -15,17 +15,17 @@
         "env": []
     },
     {
-        "id": "90b264d3d8642dfb",
+        "id": "30f9ed914c390e37",
         "type": "tab",
-        "label": "Influx to Python",
+        "label": "Python to Influx",
         "disabled": false,
         "info": "",
         "env": []
     },
     {
-        "id": "30f9ed914c390e37",
+        "id": "90b264d3d8642dfb",
         "type": "tab",
-        "label": "Python to Influx",
+        "label": "Influx to Python",
         "disabled": false,
         "info": "",
         "env": []
@@ -64,10 +64,10 @@
         "id": "3cc11d24.ff01a2",
         "type": "comment",
         "z": "f6f2187d.f17ca8",
-        "name": "WARNING: please check you have started this container with a volume that is mounted to /data\\n otherwise any flow changes are lost when you redeploy or upgrade the container\\n (e.g. upgrade to a more recent node-red docker image).\\n  If you are using named volumes you can ignore this warning.\\n Double click or see info side panel to learn how to start Node-RED in Docker to save your work",
-        "info": "\nTo start docker with a bind mount volume (-v option), for example:\n\n```\ndocker run -it -p 1880:1880 -v /home/user/node_red_data:/data --name mynodered nodered/node-red\n```\n\nwhere `/home/user/node_red_data` is a directory on your host machine where you want to store your flows.\n\nIf you do not do this then you can experiment and redploy flows, but if you restart or upgrade the container the flows will be disconnected and lost. \n\nThey will still exist in a hidden data volume, which can be recovered using standard docker techniques, but that is much more complex than just starting with a named volume as described above.",
-        "x": 350,
-        "y": 80,
+        "name": "INFO: To set-up, simply press deploy. \\n Some API connections may not work in unstable wifi connections. \\n\\n The code below pulls API data and sends it to InfluxDB",
+        "info": "",
+        "x": 800,
+        "y": 320,
         "wires": []
     },
     {
@@ -181,36 +181,6 @@
         "wires": [
             [
                 "f17a08cc2649aca9"
-            ]
-        ]
-    },
-    {
-        "id": "90eeb15b1f1a8fe0",
-        "type": "inject",
-        "z": "f6f2187d.f17ca8",
-        "name": "Universal",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "v": "",
-                "vt": "date"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 100,
-        "y": 180,
-        "wires": [
-            [
-                "72d6d715ba340832"
             ]
         ]
     },
@@ -1728,7 +1698,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "600",
+        "repeat": "240",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -1827,448 +1797,13 @@
         "wires": []
     },
     {
-        "id": "94b29647aac120f1",
-        "type": "influxdb in",
-        "z": "90b264d3d8642dfb",
-        "influxdb": "b964f598819af5c0",
-        "name": "Weather_AQI-Query-Islamabad",
-        "query": "temp = from(bucket: \"islamabadWeather\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"islamabadAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
-        "rawOutput": false,
-        "precision": "",
-        "retentionPolicy": "",
-        "org": "abacus-demo",
-        "x": 230,
-        "y": 300,
-        "wires": [
-            [
-                "06fb1b4a1a5f57bc"
-            ]
-        ]
-    },
-    {
-        "id": "dc12c150c99ce7f1",
-        "type": "inject",
-        "z": "90b264d3d8642dfb",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "600",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 210,
-        "y": 240,
-        "wires": [
-            [
-                "94b29647aac120f1"
-            ]
-        ]
-    },
-    {
-        "id": "7797df947d0b9d91",
-        "type": "http request",
-        "z": "90b264d3d8642dfb",
-        "name": "POST to Flask (Python)",
-        "method": "POST",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "http://192.168.137.183:5000/postData",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 230,
-        "y": 420,
-        "wires": [
-            [
-                "1f458404eec6c036",
-                "23456dd6d221b811"
-            ]
-        ]
-    },
-    {
-        "id": "06fb1b4a1a5f57bc",
-        "type": "function",
-        "z": "90b264d3d8642dfb",
-        "name": "parse",
-        "func": "// msg.payload is an array of points from union()\nconst city = \"Islamabad\";\n\nconst tempPoints = [];\nconst aqiPoints = [];\n\n(msg.payload || []).forEach(p => {\n  // p._time (or p.time) and p._value are typical Influx fields\n  const time = p._time || p.time;\n  const value = p._value;\n  if (p.source === \"temperature\") {\n    tempPoints.push({ time, value });\n  } else if (p.source === \"aqi\") {\n    aqiPoints.push({ time, value });\n  }\n});\n\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = {\n  city,\n  temperature: tempPoints,\n  aqi: aqiPoints\n};\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 190,
-        "y": 380,
-        "wires": [
-            [
-                "7797df947d0b9d91"
-            ]
-        ]
-    },
-    {
-        "id": "01cc762b7915f388",
-        "type": "influxdb in",
-        "z": "90b264d3d8642dfb",
-        "influxdb": "b964f598819af5c0",
-        "name": "Weather-Query-Lahore",
-        "query": "from(bucket: \"lahoreWeather\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Temperature\")\n  |> filter(fn: (r) => r[\"_field\"] == \"_value\")\n  |> yield(name: \"raw\")",
-        "rawOutput": false,
-        "precision": "",
-        "retentionPolicy": "",
-        "org": "abacus-demo",
-        "x": 250,
-        "y": 620,
-        "wires": [
-            [
-                "63fc6d19fc49ca66"
-            ]
-        ]
-    },
-    {
-        "id": "235f6f587e0c4596",
-        "type": "http request",
-        "z": "90b264d3d8642dfb",
-        "name": "POST to Flask (Python)",
-        "method": "POST",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "http://192.168.100.193:5000/postData",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 250,
-        "y": 740,
-        "wires": [
-            [
-                "b3284e3a87875d11"
-            ]
-        ]
-    },
-    {
-        "id": "63fc6d19fc49ca66",
-        "type": "function",
-        "z": "90b264d3d8642dfb",
-        "name": "parse",
-        "func": "// Node-RED Function node\n// Assume msg.payload is an array of points returned by the query\nconst city = \"Lahore\";\nconst measurement = \"Weather\";\nconst points = msg.payload.map(p => ({\n  time: p._time,       // or p.time depending on node output\n  temp: p._value, // adjust to your fields,\n}));\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = { city, measurement, points };\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 210,
-        "y": 680,
-        "wires": [
-            [
-                "235f6f587e0c4596"
-            ]
-        ]
-    },
-    {
-        "id": "b3284e3a87875d11",
-        "type": "influxdb in",
-        "z": "90b264d3d8642dfb",
-        "influxdb": "b964f598819af5c0",
-        "name": "Weather-Query-Karachi",
-        "query": "from(bucket: \"karachiWeather\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"Temperature\")\n  |> filter(fn: (r) => r[\"_field\"] == \"_value\")\n  |> yield(name: \"raw\")",
-        "rawOutput": false,
-        "precision": "",
-        "retentionPolicy": "",
-        "org": "abacus-demo",
-        "x": 570,
-        "y": 620,
-        "wires": [
-            [
-                "efe4cd1709bcd4cb"
-            ]
-        ]
-    },
-    {
-        "id": "aa4b787efb2e1ca2",
-        "type": "http request",
-        "z": "90b264d3d8642dfb",
-        "name": "POST to Flask (Python)",
-        "method": "POST",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "http://192.168.100.193:5000/postData",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 580,
-        "y": 740,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "efe4cd1709bcd4cb",
-        "type": "function",
-        "z": "90b264d3d8642dfb",
-        "name": "parse",
-        "func": "// Node-RED Function node\n// Assume msg.payload is an array of points returned by the query\nconst city = \"Karachi\";\nconst measurement = \"Weather\";\n\nconst points = msg.payload.map(p => ({\n  time: p._time,       // or p.time depending on node output\n  temp: p._value, // adjust to your fields,\n}));\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = { city, measurement, points };\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 490,
-        "y": 680,
-        "wires": [
-            [
-                "aa4b787efb2e1ca2"
-            ]
-        ]
-    },
-    {
-        "id": "846f3fff8ef2f2ab",
-        "type": "influxdb in",
-        "z": "90b264d3d8642dfb",
-        "influxdb": "b964f598819af5c0",
-        "name": "Weather+AQI-Query-Lahore",
-        "query": "temp = from(bucket: \"lahoreWeather\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"lahoreAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
-        "rawOutput": false,
-        "precision": "",
-        "retentionPolicy": "",
-        "org": "abacus-demo",
-        "x": 680,
-        "y": 300,
-        "wires": [
-            [
-                "9e11c397ded95633"
-            ]
-        ]
-    },
-    {
-        "id": "64ce6cf6f287c54c",
-        "type": "http request",
-        "z": "90b264d3d8642dfb",
-        "name": "POST to Flask (Python)",
-        "method": "POST",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "http://192.168.137.183:5000/postData",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 670,
-        "y": 420,
-        "wires": [
-            [
-                "a0e5afc8a6e8ce92",
-                "e4fe30c860339361"
-            ]
-        ]
-    },
-    {
-        "id": "9e11c397ded95633",
-        "type": "function",
-        "z": "90b264d3d8642dfb",
-        "name": "parse",
-        "func": "// msg.payload is an array of points from union()\nconst city = \"Lahore\";\n\nconst tempPoints = [];\nconst aqiPoints = [];\n\n(msg.payload || []).forEach(p => {\n  // p._time (or p.time) and p._value are typical Influx fields\n  const time = p._time || p.time;\n  const value = p._value;\n  if (p.source === \"temperature\") {\n    tempPoints.push({ time, value });\n  } else if (p.source === \"aqi\") {\n    aqiPoints.push({ time, value });\n  }\n});\n\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = {\n  city,\n  temperature: tempPoints,\n  aqi: aqiPoints\n};\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 610,
-        "y": 360,
-        "wires": [
-            [
-                "64ce6cf6f287c54c"
-            ]
-        ]
-    },
-    {
-        "id": "23456dd6d221b811",
-        "type": "debug",
-        "z": "90b264d3d8642dfb",
-        "name": "SENT to python",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 180,
-        "y": 520,
-        "wires": []
-    },
-    {
-        "id": "573ea5efc7efe6f0",
-        "type": "influxdb in",
-        "z": "90b264d3d8642dfb",
-        "influxdb": "b964f598819af5c0",
-        "name": "Weather+AQI-Query-Karachi",
-        "query": "temp = from(bucket: \"karachiWeather\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"karachiAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
-        "rawOutput": false,
-        "precision": "",
-        "retentionPolicy": "",
-        "org": "abacus-demo",
-        "x": 1100,
-        "y": 300,
-        "wires": [
-            [
-                "22e0a54ebd11a245"
-            ]
-        ]
-    },
-    {
-        "id": "fa2331d3d928e12d",
-        "type": "http request",
-        "z": "90b264d3d8642dfb",
-        "name": "POST to Flask (Python)",
-        "method": "POST",
-        "ret": "obj",
-        "paytoqs": "ignore",
-        "url": "http://192.168.137.183:5000/postData",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 1090,
-        "y": 420,
-        "wires": [
-            [
-                "97773b287f5166bb"
-            ]
-        ]
-    },
-    {
-        "id": "22e0a54ebd11a245",
-        "type": "function",
-        "z": "90b264d3d8642dfb",
-        "name": "parse",
-        "func": "// msg.payload is an array of points from union()\nconst city = \"Karachi\";\n\nconst tempPoints = [];\nconst aqiPoints = [];\n\n(msg.payload || []).forEach(p => {\n  // p._time (or p.time) and p._value are typical Influx fields\n  const time = p._time || p.time;\n  const value = p._value;\n  if (p.source === \"temperature\") {\n    tempPoints.push({ time, value });\n  } else if (p.source === \"aqi\") {\n    aqiPoints.push({ time, value });\n  }\n});\n\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = {\n  city,\n  temperature: tempPoints,\n  aqi: aqiPoints\n};\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1050,
-        "y": 360,
-        "wires": [
-            [
-                "fa2331d3d928e12d"
-            ]
-        ]
-    },
-    {
-        "id": "1f458404eec6c036",
-        "type": "delay",
-        "z": "90b264d3d8642dfb",
-        "name": "",
-        "pauseType": "delay",
-        "timeout": "5",
-        "timeoutUnits": "seconds",
-        "rate": "1",
-        "nbRateUnits": "1",
-        "rateUnits": "second",
-        "randomFirst": "1",
-        "randomLast": "5",
-        "randomUnits": "seconds",
-        "drop": false,
-        "allowrate": false,
-        "outputs": 1,
-        "x": 440,
-        "y": 360,
-        "wires": [
-            [
-                "846f3fff8ef2f2ab"
-            ]
-        ]
-    },
-    {
-        "id": "e4fe30c860339361",
-        "type": "delay",
-        "z": "90b264d3d8642dfb",
-        "name": "",
-        "pauseType": "delay",
-        "timeout": "5",
-        "timeoutUnits": "seconds",
-        "rate": "1",
-        "nbRateUnits": "1",
-        "rateUnits": "second",
-        "randomFirst": "1",
-        "randomLast": "5",
-        "randomUnits": "seconds",
-        "drop": false,
-        "allowrate": false,
-        "outputs": 1,
-        "x": 880,
-        "y": 360,
-        "wires": [
-            [
-                "573ea5efc7efe6f0"
-            ]
-        ]
-    },
-    {
-        "id": "a0e5afc8a6e8ce92",
-        "type": "debug",
-        "z": "90b264d3d8642dfb",
-        "name": "SENT to python",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 660,
-        "y": 520,
-        "wires": []
-    },
-    {
-        "id": "97773b287f5166bb",
-        "type": "debug",
-        "z": "90b264d3d8642dfb",
-        "name": "SENT to python",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1060,
-        "y": 520,
+        "id": "d0eeb1fefe310ce7",
+        "type": "comment",
+        "z": "c8dca1c07927e80d",
+        "name": "INFO: This code receives data from the Flutter Android app and sends it to InfluxDB \\n By default, a random number generator has been set up as \"False Data Generator\", to create mock user satisfaction values.",
+        "info": "",
+        "x": 470,
+        "y": 80,
         "wires": []
     },
     {
@@ -2632,7 +2167,360 @@
         ]
     },
     {
-        "id": "0ae67578893dedfb",
+        "id": "156c454a8ddc930d",
+        "type": "comment",
+        "z": "30f9ed914c390e37",
+        "name": "INFO: This code receives data from flask_post_data2.py and sends it to InfluxDB",
+        "info": "",
+        "x": 640,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "94b29647aac120f1",
+        "type": "influxdb in",
+        "z": "90b264d3d8642dfb",
+        "influxdb": "b964f598819af5c0",
+        "name": "Weather_AQI-Query-Islamabad",
+        "query": "temp = from(bucket: \"islamabadWeather\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"islamabadAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "abacus-demo",
+        "x": 230,
+        "y": 300,
+        "wires": [
+            [
+                "06fb1b4a1a5f57bc"
+            ]
+        ]
+    },
+    {
+        "id": "dc12c150c99ce7f1",
+        "type": "inject",
+        "z": "90b264d3d8642dfb",
+        "name": "Set url: ",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "url",
+                "v": " http://0.0.0.0:5000/postData",
+                "vt": "str"
+            }
+        ],
+        "repeat": "600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 220,
+        "wires": [
+            [
+                "94b29647aac120f1"
+            ]
+        ]
+    },
+    {
+        "id": "7797df947d0b9d91",
+        "type": "http request",
+        "z": "90b264d3d8642dfb",
+        "name": "POST to Flask (Python)",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 210,
+        "y": 420,
+        "wires": [
+            [
+                "23456dd6d221b811",
+                "e4fe30c860339361"
+            ]
+        ]
+    },
+    {
+        "id": "06fb1b4a1a5f57bc",
+        "type": "function",
+        "z": "90b264d3d8642dfb",
+        "name": "parse",
+        "func": "// msg.payload is an array of points from union()\nconst city = \"Islamabad\";\n\nconst tempPoints = [];\nconst aqiPoints = [];\n\n(msg.payload || []).forEach(p => {\n  // p._time (or p.time) and p._value are typical Influx fields\n  const time = p._time || p.time;\n  const value = p._value;\n  if (p.source === \"temperature\") {\n    tempPoints.push({ time, value });\n  } else if (p.source === \"aqi\") {\n    aqiPoints.push({ time, value });\n  }\n});\n\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = {\n  city,\n  temperature: tempPoints,\n  aqi: aqiPoints\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 190,
+        "y": 360,
+        "wires": [
+            [
+                "7797df947d0b9d91"
+            ]
+        ]
+    },
+    {
+        "id": "846f3fff8ef2f2ab",
+        "type": "influxdb in",
+        "z": "90b264d3d8642dfb",
+        "influxdb": "b964f598819af5c0",
+        "name": "Weather+AQI-Query-Lahore",
+        "query": "temp = from(bucket: \"lahoreWeather\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"lahoreAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "abacus-demo",
+        "x": 680,
+        "y": 300,
+        "wires": [
+            [
+                "9e11c397ded95633"
+            ]
+        ]
+    },
+    {
+        "id": "9e11c397ded95633",
+        "type": "function",
+        "z": "90b264d3d8642dfb",
+        "name": "parse",
+        "func": "// msg.payload is an array of points from union()\nconst city = \"Lahore\";\n\nconst tempPoints = [];\nconst aqiPoints = [];\n\n(msg.payload || []).forEach(p => {\n  // p._time (or p.time) and p._value are typical Influx fields\n  const time = p._time || p.time;\n  const value = p._value;\n  if (p.source === \"temperature\") {\n    tempPoints.push({ time, value });\n  } else if (p.source === \"aqi\") {\n    aqiPoints.push({ time, value });\n  }\n});\n\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = {\n  city,\n  temperature: tempPoints,\n  aqi: aqiPoints\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 360,
+        "wires": [
+            [
+                "0e03453528c15f72"
+            ]
+        ]
+    },
+    {
+        "id": "23456dd6d221b811",
+        "type": "debug",
+        "z": "90b264d3d8642dfb",
+        "name": "SENT to python",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 220,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "573ea5efc7efe6f0",
+        "type": "influxdb in",
+        "z": "90b264d3d8642dfb",
+        "influxdb": "b964f598819af5c0",
+        "name": "Weather+AQI-Query-Karachi",
+        "query": "temp = from(bucket: \"karachiWeather\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"Temperature\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"temperature\" })) \n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\naqi = from(bucket: \"karachiAQI\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"AQI\")\n  |> filter(fn: (r) => r._field == \"_value\")\n  |> map(fn: (r) => ({ r with source: \"aqi\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"source\"])\n\nunion(tables: [temp, aqi])\n  |> sort(columns: [\"_time\"])\n  |> yield(name: \"merged\")\n",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "abacus-demo",
+        "x": 1100,
+        "y": 300,
+        "wires": [
+            [
+                "22e0a54ebd11a245"
+            ]
+        ]
+    },
+    {
+        "id": "22e0a54ebd11a245",
+        "type": "function",
+        "z": "90b264d3d8642dfb",
+        "name": "parse",
+        "func": "// msg.payload is an array of points from union()\nconst city = \"Karachi\";\n\nconst tempPoints = [];\nconst aqiPoints = [];\n\n(msg.payload || []).forEach(p => {\n  // p._time (or p.time) and p._value are typical Influx fields\n  const time = p._time || p.time;\n  const value = p._value;\n  if (p.source === \"temperature\") {\n    tempPoints.push({ time, value });\n  } else if (p.source === \"aqi\") {\n    aqiPoints.push({ time, value });\n  }\n});\n\nmsg.headers = { \"content-type\": \"application/json\" };\nmsg.payload = {\n  city,\n  temperature: tempPoints,\n  aqi: aqiPoints\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1070,
+        "y": 360,
+        "wires": [
+            [
+                "8b26b9362de80fa6"
+            ]
+        ]
+    },
+    {
+        "id": "e4fe30c860339361",
+        "type": "delay",
+        "z": "90b264d3d8642dfb",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 460,
+        "y": 360,
+        "wires": [
+            [
+                "846f3fff8ef2f2ab"
+            ]
+        ]
+    },
+    {
+        "id": "0e03453528c15f72",
+        "type": "http request",
+        "z": "90b264d3d8642dfb",
+        "name": "POST to Flask (Python)",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 708.7999877929688,
+        "y": 418.6000061035156,
+        "wires": [
+            [
+                "adfc73bd219dc709",
+                "579ea41b86058e10"
+            ]
+        ]
+    },
+    {
+        "id": "adfc73bd219dc709",
+        "type": "debug",
+        "z": "90b264d3d8642dfb",
+        "name": "SENT to python",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 658.7999877929688,
+        "y": 478.6000061035156,
+        "wires": []
+    },
+    {
+        "id": "8b26b9362de80fa6",
+        "type": "http request",
+        "z": "90b264d3d8642dfb",
+        "name": "POST to Flask (Python)",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1110,
+        "y": 420,
+        "wires": [
+            [
+                "96e9980fe75cc603"
+            ]
+        ]
+    },
+    {
+        "id": "96e9980fe75cc603",
+        "type": "debug",
+        "z": "90b264d3d8642dfb",
+        "name": "SENT to python",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1100,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "579ea41b86058e10",
+        "type": "delay",
+        "z": "90b264d3d8642dfb",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 900,
+        "y": 360,
+        "wires": [
+            [
+                "573ea5efc7efe6f0"
+            ]
+        ]
+    },
+    {
+        "id": "1c0a63bfbcc37e92",
+        "type": "comment",
+        "z": "90b264d3d8642dfb",
+        "name": "URL Setup:Make sure to select the correct url used by flask_post_data2.py \\n This can be obtained by running the aforementioned code and checking the output log. \\n Example: http://0.0.0.0:5000/postData",
+        "info": "Make sure to select the correct url used by flask_post_data2.py\n\nExample: http://0.0.0.0:5000/postData",
+        "x": 640,
+        "y": 220,
+        "wires": [],
+        "icon": "node-red/alert.svg"
+    },
+    {
+        "id": "d49af7e453ef8dd6",
+        "type": "comment",
+        "z": "90b264d3d8642dfb",
+        "name": "INFO: This code queries the InfluxDB database and sends the queried data to Scikit Learn",
+        "info": "",
+        "x": 450,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "63cfcd69bc03a2bc",
         "type": "global-config",
         "env": [],
         "modules": {
