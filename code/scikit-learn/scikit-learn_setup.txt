@@ -1,4 +1,21 @@
 First, install the prerequisite Pyhton libraries (and Pyhton 3, if it is not already installed)
+They are all available with pip.
 
-Prerequisites:
-1. 
+Prerequisite libraries:
+1. pandas
+2. flask
+3. sklearn
+4. numpy
+
+Installation commands:
+pip install pandas numpy scikit-learn
+pip insatll flask
+
+Secondly, download and run the code, ensuring a stable WiFi connection.
+
+Thirdly, check the code output (e.g. on a terminal) for its active URLs.
+An example of the expected output is, "Running on http://0.0.0.0:5000"
+Copy one and write it in the following format:
+ http://0.0.0.0:5000/postData
+
+Paste this as outlined in the Node-RED setup instructions.
