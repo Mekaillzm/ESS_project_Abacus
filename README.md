@@ -9,6 +9,7 @@ This immediate detection enables operators to act quickly, addressing issues bef
 # SETUP
 
 1. InfluxDB
+
 The following buckets must be set up in InfluxDB v 2.x or above for the code to work correctly. 
 InfluxDB must be added as a data source in Grafana as well. 
 
@@ -39,6 +40,7 @@ On the InfluxDB web UI, you can upload the sample data as well; however, this ma
 
 
 2. Node-RED
+
 In your Node-RED dashboard, select Import and paste the code from flows.json.
 
 Go to the Flow "Influx to Python" and select the Node "Set url". Set msg.url to the url that flask_post_data2.py is active on. 
@@ -56,6 +58,7 @@ Thirdly, ensure InfluxDB has been set up as outlined in Influx_setup.txt
 Finally, press deploy on all four flows.
 
 3. Flutter
+
 The code/flutter folder contains code for the Flutter android app
 
 It has been on the Android 16.0 using an Android Studio based virtual machine.
@@ -68,6 +71,7 @@ Prerequisite extensions (available on Android Studio):
 -http
 
 4. Scikit Learn Model Setup
+
 First, install the prerequisite Pyhton libraries (and Pyhton 3, if it is not already installed)
 They are all available with pip.
 
@@ -91,6 +95,7 @@ Copy one and write it in the following format:
 Paste this as outlined in the Node-RED setup instructions.
 
 5. Grafana setup
+
 When setting up Grafana, do the following:
 
 Create a data source called "inlfuxdb".
@@ -114,6 +119,7 @@ Press save dashboard
 Select a suitable refresh time and time window for the dashboard, based on how much past data you would like to see.
 
 6. Testing
+
 Deploy and run all Flows one by one in Node-RED. If the wifi connection is stable, they should work as expected, and the Grafana Dashboard will update with visuals.
 
 
