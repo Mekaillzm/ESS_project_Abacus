@@ -5,6 +5,7 @@ The ESS system is perfect for organizations in the tourism industry. It simulate
 This is coupled with a robust predictive system that uses past data to simulate what locals would be expected to feel.
 This immediate detection enables operators to act quickly, addressing issues before they escalate into broader dissatisfaction or tourist decline.
 
+View the attached presentation for a more detailed walkthrough.
 
 # SETUP
 
