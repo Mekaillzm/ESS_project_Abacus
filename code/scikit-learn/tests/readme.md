@@ -1,1 +1,1 @@
-These files were obtained from testing each model.
+These data files were obtained from testing each model.
