@@ -1,11 +1,10 @@
-This folder contains code for the Flutter android app
+The code/flutter folder contains code for the Flutter android app
 
-Tested on the Android 16.0 using an Android Studio based virtual machine.
+It has been on the Android 16.0 using an Android Studio based virtual machine.
 The entire folder can be downloaded for use on Android Studio directly, after installation as outlined here: https://docs.flutter.dev/get-started/install
 
-When running, use the main.dart file for execution, and ensure all prerequisites are installed as well.
+When running, use the main.dart file for execution, and ensure all assets, code files and prerequisites are installed as well in the folder structure provided.
 Prerequisite extensions (available on Android Studio):
 -Flutter
 -Dart
 -http
-
