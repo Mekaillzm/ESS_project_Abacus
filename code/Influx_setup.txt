@@ -23,3 +23,5 @@ Names of working buckets:
 -lahoreWeather
 -lahorePredictions
 -lahoreFeelsLike
+
+On the InfluxDB web UI, you can upload the sample data as well; however, this may not work as the data contains past timestamps.
