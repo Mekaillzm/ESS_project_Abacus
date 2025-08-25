@@ -1,3 +1,16 @@
+The following buckets must be set up in InfluxDB v 2.x or above for the code to work correctly. 
+InfluxDB must be added as a data source in Grafana as well. 
+
+Access information has been included below, but this is for a local Docker container instance of InfluxDB. A new setup will require updated credentials that may or may not match the ones below.
+
+Organisation name: abacus-demo
+This organisation name has been used by Grafana and Node-RED to access the buckets outlined below.
+
+Username: amdin
+Password: admin123
+
+The username may appear to be a typo at first glance, but it is not.
+
 Names of working buckets:
 -islamabadAQI
 -islabadFeelsLike
