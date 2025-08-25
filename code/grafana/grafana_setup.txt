@@ -17,3 +17,5 @@ Once done, create a new Dashboard.
 Go to Settings > JSON model
 Paste all code from model.json
 Press save dashboard
+
+Select a suitable refresh time and time window for the dashboard, based on how much past data you would like to see.
