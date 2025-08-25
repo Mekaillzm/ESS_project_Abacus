@@ -6,7 +6,7 @@ This is coupled with a robust predictive system that uses past data to simulate 
 This immediate detection enables operators to act quickly, addressing issues before they escalate into broader dissatisfaction or tourist decline.
 
 
-SETUP
+# SETUP
 
 1. InfluxDB
 The following buckets must be set up in InfluxDB v 2.x or above for the code to work correctly. 
