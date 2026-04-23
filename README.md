@@ -5,6 +5,9 @@ The ESS system is perfect for organizations in the tourism industry. It simulate
 This is coupled with a robust predictive system that uses past data to simulate what locals would be expected to feel.
 This immediate detection enables operators to act quickly, addressing issues before they escalate into broader dissatisfaction or tourist decline.
 
+It contains a dedicated Flutter Application, Grafana Dashboard & Node-RED based system that used Scipy for algorithmic analytics to provide a live
+tracker and analysis engine for local weather & air quality.
+
 View the attached presentation for a more detailed walkthrough.
 
 # SETUP
